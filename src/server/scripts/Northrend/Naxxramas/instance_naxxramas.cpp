@@ -951,7 +951,7 @@ public:
                 timer += diff;
                 if (timer >= 5000)
                 {
-                    if (Creature* cr = me->SummonCreature(NPC_LIVING_POISON, *me, TEMPSUMMON_TIMED_DESPAWN, 9000))
+                    if (Creature* cr = me->SummonCreature(NPC_LIVING_POISON, *me, TEMPSUMMON_TIMED_DESPAWN, 15000))
                     {
                         cr->AddUnitMovementFlag(MOVEMENTFLAG_WALKING);
                         cr->GetMotionMaster()->MovePoint(0, me->GetPositionX() + 50 * cos(me->GetOrientation()), me->GetPositionY() + 50 * sin(me->GetOrientation()), me->GetPositionZ(), false);
