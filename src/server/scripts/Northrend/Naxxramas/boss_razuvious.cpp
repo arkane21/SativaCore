@@ -118,9 +118,9 @@ public:
             BossAI::EnterCombat(who);
             Talk(SAY_AGGRO);
 
-            events.ScheduleEvent(EVENT_SPELL_UNBALANCING_STRIKE, 30000);
-            events.ScheduleEvent(EVENT_SPELL_DISRUPTING_SHOUT, 25000);
-            events.ScheduleEvent(EVENT_SPELL_JAGGED_KNIFE, 15000);
+            events.ScheduleEvent(EVENT_SPELL_UNBALANCING_STRIKE, 20000);
+            events.ScheduleEvent(EVENT_SPELL_DISRUPTING_SHOUT, 15000);
+            events.ScheduleEvent(EVENT_SPELL_JAGGED_KNIFE, 10000);
             events.ScheduleEvent(EVENT_PLAY_COMMAND, 40000);
 
             summons.DoZoneInCombat();
@@ -139,18 +139,18 @@ public:
             {
                 case EVENT_SPELL_UNBALANCING_STRIKE:
                     me->CastSpell(me->GetVictim(), SPELL_UNBALANCING_STRIKE, false);
-                    events.RepeatEvent(30000);
+                    events.RepeatEvent(6000);
                     break;
                 case EVENT_SPELL_DISRUPTING_SHOUT:
                     Talk(SAY_SHOUT);
                     me->CastSpell(me, RAID_MODE(SPELL_DISRUPTING_SHOUT_10, SPELL_DISRUPTING_SHOUT_25), false);
-                    events.RepeatEvent(25000);
+                    events.RepeatEvent(15000);
                     break;
                 case EVENT_SPELL_JAGGED_KNIFE:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 45.0f))
                         me->CastSpell(target, SPELL_JAGGED_KNIFE, false);
 
-                    events.RepeatEvent(25000);
+                    events.RepeatEvent(10000);
                     break;
                 case EVENT_PLAY_COMMAND:
                     Talk(SAY_TAUNTED);
