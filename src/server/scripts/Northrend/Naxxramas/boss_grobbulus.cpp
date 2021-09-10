@@ -7,11 +7,14 @@
 #include "naxxramas.h"
 #include "PassiveAI.h"
 #include "SpellScript.h"
+#include "SpellAuras.h"
+#include "SpellAuraEffects.h"
 
 enum Spells
 {
     SPELL_POISON_CLOUD                      = 28240,
     SPELL_MUTATING_INJECTION                = 28169,
+    SPELL_MUTATING_EXPLOSION                = 28206,
     SPELL_SLIME_SPRAY_10                    = 28157,
     SPELL_SLIME_SPRAY_25                    = 54364,
     SPELL_POISON_CLOUD_DAMAGE_AURA_10       = 28158,
@@ -253,9 +256,47 @@ public:
     }
 };
 
+class spell_grobbulus_mutating_injection : public SpellScriptLoader
+{
+public:
+    spell_grobbulus_mutating_injection() : SpellScriptLoader("spell_grobbulus_mutating_injection") { }
+
+    class spell_grobbulus_mutating_injection_AuraScript : public AuraScript
+    {
+        PrepareAuraScript(spell_grobbulus_mutating_injection_AuraScript);
+
+        void HandleRemove(AuraEffect const* /*aurEff*/, AuraEffectHandleModes /*mode*/)
+        {
+            switch (GetTargetApplication()->GetRemoveMode())
+            {
+            case AURA_REMOVE_BY_ENEMY_SPELL:
+            case AURA_REMOVE_BY_EXPIRE:
+                if (auto caster = GetCaster())
+                {
+                    caster->CastSpell(GetTarget(), SPELL_MUTATING_EXPLOSION, true);
+                }
+                break;
+            default:
+                return;
+            }
+        }
+
+        void Register() override
+        {
+            AfterEffectRemove += AuraEffectRemoveFn(spell_grobbulus_mutating_injection_AuraScript::HandleRemove, EFFECT_0, SPELL_AURA_DUMMY, AURA_EFFECT_HANDLE_REAL);
+        }
+    };
+
+    AuraScript* GetAuraScript() const override
+    {
+        return new spell_grobbulus_mutating_injection_AuraScript();
+    }
+};
+
 void AddSC_boss_grobbulus()
 {
     new boss_grobbulus();
     new boss_grobbulus_poison_cloud();
     new spell_grobbulus_poison();
+    new spell_grobbulus_mutating_injection();
 }
