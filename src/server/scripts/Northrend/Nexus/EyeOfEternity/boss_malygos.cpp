@@ -744,7 +744,7 @@ public:
                     events.RepeatEvent(3000);
                     break;
                 case EVENT_SPELL_STATIC_FIELD:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, false))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                     {
                         me->SetFacingToObject(target);
                         me->CastSpell(target, SPELL_STATIC_FIELD_MAIN, true);
