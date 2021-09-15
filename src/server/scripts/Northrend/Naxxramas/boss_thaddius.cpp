@@ -91,6 +91,7 @@ enum Misc
     ACTION_SUMMON_DIED                  = 2,
     ACTION_RESTORE                      = 3,
     NPC_TESLA_COIL                      = 16218,           //the coils (emotes "Tesla Coil overloads!")
+    THADDIUS_ROOM_DOOR                  = 181121
 };
 
 class boss_thaddius : public CreatureScript
@@ -173,6 +174,10 @@ public:
                 cr->SetDisableGravity(true);
                 cr->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC);
             }
+            if (GameObject* go = me->FindNearestGameObject(THADDIUS_ROOM_DOOR, 200.0f))
+            {
+                go->SetGoState(GO_STATE_ACTIVE);
+            }
         }
 
         void KilledUnit(Unit* who) override
@@ -194,6 +199,10 @@ public:
             {
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(28059);
                 pInstance->DoRemoveAurasDueToSpellOnPlayers(28084);
+            }
+            if (GameObject* go = me->FindNearestGameObject(THADDIUS_ROOM_DOOR, 200.0f))
+            {
+                go->SetGoState(GO_STATE_ACTIVE);
             }
         }
 
@@ -352,6 +361,10 @@ public:
         void EnterCombat(Unit* pWho) override
         {
             me->SetInCombatWithZone();
+            if (GameObject* go = me->FindNearestGameObject(THADDIUS_ROOM_DOOR, 200.0f))
+            {
+                go->SetGoState(GO_STATE_READY);
+            }
             if (Creature* cr = me->FindNearestCreature(NPC_TESLA_COIL, 150.f, true))
                 myCoil = cr->GetGUID();
 
