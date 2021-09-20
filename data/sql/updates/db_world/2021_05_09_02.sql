@@ -88,33 +88,33 @@ UPDATE `creature_template` SET `mindmg` = 10800, `maxdmg` = 14400, `DamageModifi
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 33113;
 UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69400, `DamageModifier` = 1.01 WHERE `entry` = 34003;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 33118;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69400, `DamageModifier` = 1.01 WHERE `entry` = 33190;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 50400, `DamageModifier` = 1.01 WHERE `entry` = 33190;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 33186;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33724;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33724;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 33293;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33885;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33885;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 32930;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33909;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33909;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 33515;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 34175;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 34175;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 32845;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 32846;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 32846;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 33271;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33449;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33449;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 33288;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33955;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33955;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 32871;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33070;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33070;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 32857;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33694;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33694;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 32927;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33692;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33692;
 UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34700, `DamageModifier` = 1.01 WHERE `entry` = 32867;
-UPDATE `creature_template` SET `mindmg` = 50900, `maxdmg` = 69700, `DamageModifier` = 1.01 WHERE `entry` = 33693;
+UPDATE `creature_template` SET `mindmg` = 40900, `maxdmg` = 52900, `DamageModifier` = 1.01 WHERE `entry` = 33693;
 
 /* Thorim - Hes basic melee is lowered by 50% due staccking increase of damage and attack speed.*/
-UPDATE `creature_template` SET `mindmg` = 12725, `maxdmg` = 17350, `DamageModifier` = 1.01 WHERE `entry` = 32865;
-UPDATE `creature_template` SET `mindmg` = 25450, `maxdmg` = 34850, `DamageModifier` = 1.01 WHERE `entry` = 33147;
+UPDATE `creature_template` SET `mindmg` = 10725, `maxdmg` = 15350, `DamageModifier` = 1.01 WHERE `entry` = 32865;
+UPDATE `creature_template` SET `mindmg` = 19450, `maxdmg` = 28850, `DamageModifier` = 1.01 WHERE `entry` = 33147;
 
 /* FREYA - Due Hard Mode and flat increase of 75% Psy. damage, her basic is lowered by 30%. */
 UPDATE `creature_template` SET `mindmg` = 17815, `maxdmg` = 23905, `DamageModifier` = 1.01 WHERE `entry` = 32906;
