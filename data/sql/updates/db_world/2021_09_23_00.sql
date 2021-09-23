@@ -14,7 +14,7 @@ UPDATE creature_template SET mindmg=30000, maxdmg=43000 WHERE entry IN (33360);
 UPDATE creature_template SET mindmg=25020, maxdmg=33020 WHERE entry IN (33376);
 
 -- Plantas esplosivas 
-UPDATE creature_template SET mindmg=1250, maxdmg=17050 WHERE entry IN (33399);
+UPDATE creature_template SET mindmg=1250, maxdmg=7050 WHERE entry IN (33399);
 
 -- Thorim Adds de adentro los pequeños 
 UPDATE creature_template SET mindmg=3480, maxdmg=4530 WHERE entry IN (33161); 
