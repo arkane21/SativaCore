@@ -41,6 +41,9 @@ enum ThorimSpells
     SPELL_BLIZZARD_10                       = 62577,
     SPELL_BLIZZARD_25                       = 62603,
     SPELL_FROST_NOVA                        = 62605,
+    SPELL_VIPER                             = 34074,
+    SPELL_WEAKNESS                          = 70728,
+    SPELL_QUAD                              = 70747,
 
     // DARK RUNE ACOLYTE
     SPELL_GREATER_HEAL_10                   = 62334,
@@ -221,6 +224,7 @@ enum ThorimEvents
     EVENT_SIF_BLIZZARD                      = 104,
     EVENT_SIF_FROST_NOVA_START              = 105,
     EVENT_SIF_FROST_NOVA_CAST               = 106,
+    EVENT_SIF_REAURA                        = 107,
 
     EVENT_DR_WARBRINGER_RS                  = 110,
 
@@ -886,10 +890,14 @@ public:
                     break;
                 case EVENT_SIF_JOIN_TALK:
                     me->PlayDirectSound(SOUND_SIF_EVENT);
+                    me->CastSpell(me, SPELL_VIPER, false);
+                    me->CastSpell(me, SPELL_WEAKNESS, false);
+                    me->CastSpell(me, SPELL_QUAD, false);
                     me->MonsterYell("Impossible! Lord Thorim, I will bring your foes a frigid death!", LANG_UNIVERSAL, 0);
                     events.ScheduleEvent(EVENT_SIF_FROST_NOVA_START, 1000);
                     events.ScheduleEvent(EVENT_SIF_FROSTBOLT_VALLEY, 11000);
                     events.ScheduleEvent(EVENT_SIF_BLIZZARD, 15000);
+                    events.ScheduleEvent(EVENT_SIF_REAURA, 5000);
                     break;
                 case EVENT_SIF_FROSTBOLT_VALLEY:
                     me->CastSpell(me, SPELL_FROSTBOLT_VALLEY, false);
@@ -909,6 +917,11 @@ public:
                 case EVENT_SIF_FROST_NOVA_CAST:
                     _allowCast = true;
                     me->CastSpell(me, SPELL_FROST_NOVA, false);
+                    return;
+                case EVENT_SIF_REAURA:
+                    me->CastSpell(me, SPELL_WEAKNESS, false);
+                    me->CastSpell(me, SPELL_QUAD, false);
+                    events.RepeatEvent(5000);
                     return;
             }
 
