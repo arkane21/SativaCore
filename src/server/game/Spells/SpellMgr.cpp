@@ -4937,6 +4937,14 @@ void SpellMgr::LoadDbcDataCorrections()
                 break;
 
             // KOLOGARN
+            case 63342:
+            case 63347:
+            case 63977:
+            case 63702:
+            case 63676:
+                spellInfo->MaxAffectedTargets = 1;
+             //   spellInfo->EffectImplicitTargetB[EFFECT_0] = 0;
+                break;
             // Stone Grip, remove absorb aura
             case 62056:
             case 63985:
