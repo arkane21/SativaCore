@@ -950,10 +950,12 @@ public:
     {
         npc_ulduar_dark_rune_guardianAI(Creature* pCreature) : ScriptedAI(pCreature) { }
 
+        uint32 timer1;
         uint32 timer2;
 
         void Reset()
         {
+            timer1 = 100;
             timer2 = 6000;
         }
 
@@ -967,17 +969,23 @@ public:
             if( !UpdateVictim() )
                 return;
 
+            if (timer1 <= diff)
+            {
+                me->CastSpell(me, ATTACK_DOUBLE, true);
+                timer1 = 1000000;  //Prevenir que el aura se apile de forma infinita
+            }
+            else
+                timer1 -= diff;
+
             if (timer2 <= diff) timer2 = 0;
             else timer2 -= diff;
             if (timer2 == 0 && me->GetVictim() && me->IsWithinMeleeRange(me->GetVictim()))
             {
-                me->CastSpell(me->GetVictim(), 65971, true);
-                me->CastSpell(me->GetVictim(), 65971, true); // me->CastSpell(me->GetVictim(), 65972, true); // cast the same twice cus second one requires setting offhand damage
-                me->CastSpell(me->GetVictim(), 64757, true);
-                timer2 = urand(8000, 10000);
-                return;
+              me->CastSpell(me->GetVictim(), 65971, true);
+              me->CastSpell(me->GetVictim(), 65971, true); // me->CastSpell(me->GetVictim(), 65972, true); // cast the same twice cus second one requires setting offhand damage
+              me->CastSpell(me->GetVictim(), 64757, true);
+              timer2 = urand(8000, 10000);
             }
-
             DoMeleeAttackIfReady();
         }
     };
@@ -1058,7 +1066,7 @@ public:
 
         void Reset()
         {
-            timer1 = urand(1000, 2000);
+            timer1 = 5000;
             timer2 = 6000;
         }
 
