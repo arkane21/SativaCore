@@ -425,7 +425,7 @@ public:
                         Talk(FLAME_LEVIATHAN_SAY_TOWER_NONE);
                     return;
                 case EVENT_REINSTALL:
-                    for (uint8 i = RAID_MODE(0, 2); i < 4; ++i)
+                    for (uint8 i = RAID_MODE(2, 0); i < 4; ++i)
                         if (Unit* seat = vehicle->GetPassenger(i))
                             if (seat->GetTypeId() == TYPEID_UNIT)
                                 seat->ToCreature()->AI()->EnterEvadeMode();
@@ -2155,7 +2155,7 @@ public:
         void OnPeriodic(AuraEffect const*  /*aurEff*/)
         {
             if (Unit* target = GetTarget())
-                if (int(target->GetAppliedAuras().count(SPELL_OVERLOAD_CIRCUIT)) >= (target->GetMap()->Is25ManRaid() ? 4 : 2))
+                if (int(target->GetAppliedAuras().count(SPELL_OVERLOAD_CIRCUIT)) >= (target->GetMap()->Is25ManRaid() ? 2 : 4))
                 {
                     target->CastSpell(target, SPELL_SYSTEMS_SHUTDOWN, true);
                     target->RemoveAurasDueToSpell(SPELL_OVERLOAD_CIRCUIT);
