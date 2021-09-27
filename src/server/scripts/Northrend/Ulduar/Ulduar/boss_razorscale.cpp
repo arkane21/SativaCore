@@ -24,6 +24,7 @@
 #define SPELL_FUSEARMOR                     64771
 #define SPELL_DEVOURINGFLAME                63236
 #define SPELL_BERSERK                       47008
+#define ATTACK_DOUBLE                       19818
 
 #define SPELL_CHAIN_1                       49679
 #define SPELL_CHAIN_2                       49682
