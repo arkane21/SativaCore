@@ -91,6 +91,8 @@ enum FreyaSpells
     SPELL_LIGHTNING_LASH_25                     = 62939,
     SPELL_STORMBOLT_10                          = 62649,
     SPELL_STORMBOLT_25                          = 62938,
+    SPELL_STOMR_LASHER_VISUAL                   = 62639,
+    SPELL_STOMR_LASHER_VISUAL_2                 = 52663,
 
     // ANCIENT CONSERVATOR
     SPELL_CONSERVATOR_GRIP                      = 62532,
@@ -104,6 +106,7 @@ enum FreyaSpells
     SPELL_DETONATE_10                           = 62598,
     SPELL_DETONATE_25                           = 62937,
     SPELL_FLAME_LASH                            = 62608,
+    SPELL_DETONATING_VISUAL                     = 48195,
 
     // ACHIEVEMENT
     SPELL_DEFORESTATION_CREDIT                  = 65015,
@@ -163,6 +166,7 @@ enum FreyaEvents
 
     // SUMMONS
     EVENT_ANCIENT_CONSERVATOR_NATURE_FURY       = 40,
+    EVENT_ANCIENT_CONSERVATOR_GRIP              = 41,
     EVENT_WATER_SPIRIT_CHARGE                   = 45,
     EVENT_WATER_SPIRIT_DAMAGE                   = 46,
     EVENT_STORM_LASHER_LIGHTNING_LASH           = 50,
@@ -1159,7 +1163,7 @@ public:
             if (me->GetEntry() == NPC_ANCIENT_CONSERVATOR)
             {
                 me->CastSpell(me, SPELL_HEALTHY_SPORE_SUMMON, true);
-                me->CastSpell(me, SPELL_CONSERVATOR_GRIP, false);
+                events.ScheduleEvent(EVENT_ANCIENT_CONSERVATOR_GRIP, 50);
                 events.ScheduleEvent(EVENT_ANCIENT_CONSERVATOR_NATURE_FURY, 14000);
                 _stackCount = ACTION_REMOVE_25_STACK;
             }
@@ -1170,12 +1174,14 @@ public:
             }
             else if (me->GetEntry() == NPC_STORM_LASHER)
             {
+                events.ScheduleEvent(EVENT_STORM_LASHER_VISUAL, 50);
                 events.ScheduleEvent(EVENT_STORM_LASHER_LIGHTNING_LASH, 10000);
                 events.ScheduleEvent(EVENT_STORM_LASHER_STORMBOLT, 6000);
                 _stackCount = ACTION_REMOVE_10_STACK;
             }
             else if (me->GetEntry() == NPC_DETONATING_LASHER)
             {
+                events.ScheduleEvent(EVENT_DETONANING_VISUAL, 0);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_FLAME_LASH, 10000);
                 _stackCount = ACTION_REMOVE_2_STACK;
             }
@@ -1201,6 +1207,9 @@ public:
                     me->CastSpell(me->GetVictim(), SPELL_NATURE_FURY, false);
                     events.RepeatEvent(14000);
                     break;
+                case EVENT_ANCIENT_CONSERVATOR_GRIP:
+                   me->CastSpell(me, SPELL_CONSERVATOR_GRIP, false);
+                   break;
                 case EVENT_WATER_SPIRIT_CHARGE:
                     me->CastSpell(me, SPELL_TIDAL_WAVE_AURA, true);
                     me->CastSpell(me->GetVictim(), SPELL_TIDAL_WAVE, false);
@@ -1218,6 +1227,14 @@ public:
                 case EVENT_STORM_LASHER_STORMBOLT:
                     me->CastSpell(me->GetVictim(), SPELL_STORMBOLT, false);
                     events.RepeatEvent(6000);
+                    break;
+                case EVENT_STORM_LASHER_VISUAL:
+                    me->CastSpell(me, SPELL_STOMR_LASHER_VISUAL, TRUE);
+                    me->CastSpell(me, SPELL_STOMR_LASHER_VISUAL_2, TRUE);
+                    events.RepeatEvent(1000000); //Prevenir que el aura se stackee de forma infinita
+                    break;
+                case EVENT_DETONANING_VISUAL:
+                    me->CastSpell(me, SPELL_DETONATING_VISUAL, FALSE);
                     break;
                 case EVENT_DETONATING_LASHER_FLAME_LASH:
                     me->CastSpell(me->GetVictim(), SPELL_FLAME_LASH, false);
