@@ -9,40 +9,40 @@
 
 enum Yells
 {
-    SAY_GREET = 0,
-    SAY_AGGRO = 1,
-    SAY_SLAY = 2,
-    SAY_DEATH = 3,
-    EMOTE_WIDOWS_EMBRACE = 4,
-    EMOTE_FRENZY = 5,
-    SAY_FRENZY = 6
+    SAY_GREET                                   = 0,
+    SAY_AGGRO                                   = 1,
+    SAY_SLAY                                    = 2,
+    SAY_DEATH                                   = 3,
+    EMOTE_WIDOWS_EMBRACE                        = 4,
+    EMOTE_FRENZY                                = 5,
+    SAY_FRENZY                                  = 6
 };
 
 enum Spells
 {
-    SPELL_POISON_BOLT_VOLLEY_10 = 28796,
-    SPELL_POISON_BOLT_VOLLEY_25 = 54098,
-    SPELL_RAIN_OF_FIRE_10 = 28794,
-    SPELL_RAIN_OF_FIRE_25 = 54099,
-    SPELL_FRENZY_10 = 28798,
-    SPELL_FRENZY_25 = 54100,
-    SPELL_WIDOWS_EMBRACE = 28732,
-    SPELL_MINION_WIDOWS_EMBRACE = 54097
+    SPELL_POISON_BOLT_VOLLEY_10                 = 28796,
+    SPELL_POISON_BOLT_VOLLEY_25                 = 54098,
+    SPELL_RAIN_OF_FIRE_10                       = 28794,
+    SPELL_RAIN_OF_FIRE_25                       = 54099,
+    SPELL_FRENZY_10                             = 28798,
+    SPELL_FRENZY_25                             = 54100,
+    SPELL_WIDOWS_EMBRACE                        = 28732,
+    SPELL_MINION_WIDOWS_EMBRACE                 = 54097
 };
 
 enum Events
 {
-    EVENT_POISON_BOLT = 1,
-    EVENT_RAIN_OF_FIRE = 2,
-    EVENT_FRENZY = 3
+    EVENT_POISON_BOLT                           = 1,
+    EVENT_RAIN_OF_FIRE                          = 2,
+    EVENT_FRENZY                                = 3
 };
 
 enum Misc
 {
-    NPC_NAXXRAMAS_WORSHIPPER = 16506,
-    NPC_NAXXRAMAS_FOLLOWER = 16505,
+    NPC_NAXXRAMAS_WORSHIPPER                    = 16506,
+    NPC_NAXXRAMAS_FOLLOWER                      = 16505,
 
-    SPIDER_WEB_ENTRANCE = 181235
+    SPIDER_WEB_ENTRANCE                         = 181235
 };
 
 class boss_faerlina : public CreatureScript

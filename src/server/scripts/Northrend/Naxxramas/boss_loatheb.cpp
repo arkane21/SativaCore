@@ -99,6 +99,7 @@ public:
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_SPELL_NECROTIC_AURA, 10000);
             events.ScheduleEvent(EVENT_SPELL_DEATHBLOOM, 6000);
+            events.ScheduleEvent(EVENT_SPELL_INEVITABLE_DOOM, 120000);
             events.ScheduleEvent(EVENT_SUMMON_SPORE, 12000);
             events.ScheduleEvent(EVENT_SPELL_BERSERK, 720000);
         }
@@ -136,11 +137,11 @@ public:
                     break;
                 case EVENT_SPELL_INEVITABLE_DOOM:
                     me->CastSpell(me, RAID_MODE(SPELL_INEVITABLE_DOOM_10, SPELL_INEVITABLE_DOOM_25), false);
-                    events.RepeatEvent(events.GetTimer() < 5 * MINUTE * IN_MILLISECONDS ? 30000 : 15000);
+                    events.RepeatEvent(events.GetTimer() < 5 * MINUTE * IN_MILLISECONDS ? 30000 : 15000);  //Faltaba activar el evento 
                     break;
                 case EVENT_SPELL_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, true);
-                    
+
                     break;
             }
 
