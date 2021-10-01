@@ -171,6 +171,8 @@ enum FreyaEvents
     EVENT_WATER_SPIRIT_DAMAGE                   = 46,
     EVENT_STORM_LASHER_LIGHTNING_LASH           = 50,
     EVENT_STORM_LASHER_STORMBOLT                = 51,
+    EVENT_STORM_LASHER_VISUAL                   = 52,
+    EVENT_DETONANING_VISUAL                     = 53,
     EVENT_DETONATING_LASHER_FLAME_LASH          = 55,
 };
 
