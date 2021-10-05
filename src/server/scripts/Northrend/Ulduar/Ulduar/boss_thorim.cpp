@@ -1102,6 +1102,7 @@ public:
             {
                 if (Creature* cr = me->FindNearestCreature(NPC_THUNDER_ORB, 100))
                     cr->CastSpell(cr, SPELL_LIGHTNING_ORB_VISUAL, true);
+                    me->DespawnOrUnsummon(8000);
             }
         }
 
