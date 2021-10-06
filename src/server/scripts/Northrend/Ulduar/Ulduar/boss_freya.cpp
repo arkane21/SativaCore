@@ -1231,12 +1231,12 @@ public:
                     events.RepeatEvent(6000);
                     break;
                 case EVENT_STORM_LASHER_VISUAL:
-                    me->CastSpell(me, SPELL_STOMR_LASHER_VISUAL, TRUE);
-                    me->CastSpell(me, SPELL_STOMR_LASHER_VISUAL_2, TRUE);
+                    me->CastSpell(me, SPELL_STOMR_LASHER_VISUAL, true);
+                    me->CastSpell(me, SPELL_STOMR_LASHER_VISUAL_2, true);
                     events.RepeatEvent(1000000); //Prevenir que el aura se stackee de forma infinita
                     break;
                 case EVENT_DETONANING_VISUAL:
-                    me->CastSpell(me, SPELL_DETONATING_VISUAL, FALSE);
+                    me->CastSpell(me, SPELL_DETONATING_VISUAL, false);
                     break;
                 case EVENT_DETONATING_LASHER_FLAME_LASH:
                     me->CastSpell(me->GetVictim(), SPELL_FLAME_LASH, false);
