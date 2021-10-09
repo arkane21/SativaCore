@@ -48,8 +48,9 @@ enum SpellData
     SPELL_SPINNING_UP                               = 63414,
 
     // PHASE 3:
-    SPELL_PLASMA_BALL_25                            = 64535,
+    SPELL_PLASMA_BALL_25                            = 63689,
     SPELL_PLASMA_BALL_10                            = 63689,
+    SPELL_DAMAGE_SPELL_20                           = 56258,
 
     SPELL_MAGNETIC_CORE                             = 64436,
     SPELL_SPINNING                                  = 64438,
@@ -188,6 +189,7 @@ enum EVENTS
     EVENT_MAGNETIC_CORE_PULL_DOWN                   = 42,
     EVENT_MAGNETIC_CORE_FREE                        = 43,
     EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE           = 44,
+    EVENT_DAMAGE                                    = 45,
 
     // Hard mode:
     EVENT_COMPUTER_SAY_INITIATED                    = 60,
@@ -1053,7 +1055,6 @@ public:
                         break;
                     case 4:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        DoResetThreat();
                         Phase = 4;
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         if (Unit* target = SelectTargetFromPlayerList(75.0f))
@@ -1347,7 +1348,7 @@ public:
                         events.Reset();
                         events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
                         events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
-                        events.ScheduleEvent(EVENT_HAND_PULSE, 1);
+                        events.ScheduleEvent(EVENT_HAND_PULSE, 0);
                         events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 30000);
                         if (Creature* c = GetMimiron())
                             if (c->AI()->GetData(1))
@@ -1492,7 +1493,7 @@ public:
                     events.RepeatEvent(3200);
                     break;
                 case EVENT_HAND_PULSE:
-                    if (Player* p = SelectTargetFromPlayerList(80.0f))
+                    if (Player* p = SelectTargetFromPlayerList(40.0f))
                     {
                         me->SetFacingToObject(p);
                         if (Unit* vb = me->GetVehicleBase())
@@ -1518,7 +1519,7 @@ public:
                     break;
                 case EVENT_SPELL_SPINNING_UP:
                     events.RepeatEvent(45000);
-                    if (Player* p = SelectTargetFromPlayerList(80.0f))
+                    if (Player* p = SelectTargetFromPlayerList(40.0f))
                     {
                         float angle = me->GetAngle(p);
 
@@ -1532,7 +1533,7 @@ public:
                         spinningUpOrientation = (uint32)((angle * 100.0f) / (2 * M_PI));
                         spinningUpTimer = 1500;
                         me->SetFacingTo(angle);
-                        me->CastSpell(p, SPELL_SPINNING_UP, true);
+                        me->CastSpell(p, SPELL_SPINNING_UP, false);
                         events.RescheduleEvent((Phase == 2 ? EVENT_SPELL_RAPID_BURST : EVENT_HAND_PULSE), 14500);
                     }
                     break;
@@ -1684,12 +1685,8 @@ public:
                         break;
                     case 4:
                         me->SetReactState(REACT_AGGRESSIVE);
-                        DoResetThreat();
                         Phase = 4;
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
-                        if (Unit* target = SelectTargetFromPlayerList(75.0f))
-                            AttackStart(target);
-                        DoZoneInCombat();
                         events.Reset();
                         events.ScheduleEvent(EVENT_SPELL_PLASMA_BALL, 0);
 
@@ -1813,13 +1810,15 @@ public:
                         {
                             if( Unit* victim = me->GetVictim() )
                                 me->CastSpell(victim, SPELL_PLASMA_BALL, false);
+                                events.ScheduleEvent(EVENT_DAMAGE, 0);
                         }
                         else
                         {
-                            if (Unit* victim = SelectTarget(SELECT_TARGET_RANDOM, 0, 27.5f, true))
+                            if( Unit* victim = me->GetVictim() )
                             {
                                 me->SetFacingToObject(victim);
                                 me->CastSpell(victim, SPELL_PLASMA_BALL, false);
+                                events.ScheduleEvent(EVENT_DAMAGE, 0);
                             }
                         }
                     }
@@ -1867,6 +1866,13 @@ public:
                     break;
                 case EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE:
                     immobilized = false;
+                    break;
+                case EVENT_DAMAGE:
+                if (Is25ManRaid())
+                {
+                  me->CastSpell(me, SPELL_DAMAGE_SPELL_20);
+                  events.RepeatEvent(10000000); //Prevenir k el aura se acumule de forma infinita
+                }
                     break;
             }
         }

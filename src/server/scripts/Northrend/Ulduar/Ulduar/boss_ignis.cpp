@@ -126,7 +126,7 @@ public:
             else if (spell->Id == SPELL_HEAT_BUFF)
             {
                 if (Aura* a = me->GetAura(SPELL_HEAT_BUFF))
-                    if( a->GetStackAmount() >= RAID_MODE(10, 10) )
+                    if( a->GetStackAmount() >= RAID_MODE(10, 20) )
                     {
                         if (RAID_MODE(1, 0) && a->GetStackAmount() > 10) // prevent going over 10 on 10man version
                             a->ModStackAmount(-1);
