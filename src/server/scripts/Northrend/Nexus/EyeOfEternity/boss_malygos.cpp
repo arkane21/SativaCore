@@ -378,7 +378,7 @@ public:
                 case EVENT_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, true);
                     Talk(EMOTE_BERSERK);
-                    
+
                     break;
                 case EVENT_INTRO_MOVE_CENTER:
                     {
@@ -537,7 +537,7 @@ public:
                     }
                 case EVENT_VORTEX_LAND_0:
                     me->GetMotionMaster()->MoveLand(MI_POINT_VORTEX_LAND, CenterPos, 7.0f);
-                    
+
                     break;
                 case EVENT_VORTEX_LAND_1:
                     {
@@ -746,10 +746,11 @@ public:
                 case EVENT_SPELL_STATIC_FIELD:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 200.0f, true))
                     {
-                        me->SetFacingToObject(target);
-                        me->CastSpell(target, SPELL_STATIC_FIELD_MAIN, true);
+                    me->SetFacingToObject(target);
+                    me->CastSpell((Unit*)nullptr, SPELL_STATIC_FIELD_MAIN, false);
                     }
                     events.RepeatEvent(12000);
+
                     break;
                 case EVENT_SPELL_PH3_SURGE_OF_POWER:
                     me->CastSpell((Unit*)nullptr, SPELL_PH3_SURGE_OF_POWER, false);
