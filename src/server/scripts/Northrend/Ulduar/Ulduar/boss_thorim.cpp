@@ -226,6 +226,7 @@ enum ThorimEvents
     EVENT_SIF_FROST_NOVA_CAST               = 106,
     EVENT_SIF_REAURA                        = 107,
 
+
     EVENT_DR_WARBRINGER_RS                  = 110,
 
     EVENT_DR_EVOKER_RL                      = 120,
@@ -1045,22 +1046,24 @@ public:
         void MoveInLineOfSight(Unit* /*who*/) {}
         void EnterCombat(Unit* /*who*/) {}
         void AttackStart(Unit* /*who*/) {}
-
         void InitWaypoint()
         {
-            AddWaypoint(1, 2104.6f, -268.5f, 419.4f, 0);
-            AddWaypoint(2, 2104.3f, -256.3f, 419.4f, 0);
-            AddWaypoint(3, 2109.3f, -246.4f, 419.4f, 0);
-            AddWaypoint(4, 2117.9f, -238.6f, 419.4f, 0);
-            AddWaypoint(5, 2128.8f, -232.1f, 419.4f, 0);
-            AddWaypoint(6, 2151.9f, -237.5f, 419.4f, 0);
-            AddWaypoint(7, 2164.9f, -256.3f, 419.4f, 0);
-            AddWaypoint(8, 2161.5f, -280.0f, 419.4f, 0);
+          AddWaypoint(1, 2104.6f, -268.5f, 419.4f, 0);
+          AddWaypoint(2, 2104.3f, -256.3f, 419.4f, 0);
+          AddWaypoint(3, 2109.3f, -246.4f, 419.4f, 0);
+          AddWaypoint(4, 2117.9f, -238.6f, 419.4f, 0);
+          AddWaypoint(5, 2128.8f, -232.1f, 419.4f, 0);
+          AddWaypoint(6, 2151.9f, -237.5f, 419.4f, 0);
+          AddWaypoint(7, 2164.9f, -256.3f, 419.4f, 0);
+          AddWaypoint(8, 2161.5f, -280.0f, 419.4f, 0);
+          AddWaypoint(9, 2155.5f, -291.0f, 419.4f, 0);
+          AddWaypoint(10, 2143.5f, -286.0f, 419.4f, 0);
+          AddWaypoint(11, 2128.5f, -286.0f, 419.4f, 0);
+          AddWaypoint(12, 2117.5f, -289.0f, 419.4f, 0);
         }
-
         void Reset()
         {
-            me->SetSpeed(MOVE_RUN, 1);
+            me->SetSpeed(MOVE_RUN, 1.3);
             me->SetSpeed(MOVE_WALK, 1);
             me->CastSpell(me, RAID_MODE(SPELL_BLIZZARD_10, SPELL_BLIZZARD_25), true);
         }
