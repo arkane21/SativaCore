@@ -131,6 +131,7 @@ enum YoggSpells
     SPELL_DRAIN_LIFE_10                 = 64159,
     SPELL_DRAIN_LIFE_25                 = 64160,
     SPELL_RECENTLY_SPAWNED              = 64497,
+    SPELL_EMERGE                        = 48195,
 };
 
 #define SPELL_PSYCHOSIS         RAID_MODE(SPELL_SARA_PSYCHOSIS_10, SPELL_SARA_PSYCHOSIS_25)
@@ -155,6 +156,7 @@ enum YoggEvents
     EVENT_SARA_P2_OPEN_PORTALS          = 18,
     EVENT_SARA_P2_REMOVE_STUN           = 19,
     EVENT_SARA_P2_SPAWN_START_TENTACLES = 20,
+    EVENT_EMERGE                        = 21,
 
     EVENT_YS_LUNATIC_GAZE               = 30,
     EVENT_YS_DEAFENING_ROAR             = 31,
@@ -1497,9 +1499,6 @@ public:
         {
             if (who && damagetype == DIRECT_DAMAGE)
             {
-                DoResetThreat();
-                me->AddThreat(who, 100000);
-                AttackStart(who);
                 me->InterruptNonMeleeSpells(false);
             }
         }
@@ -1790,13 +1789,14 @@ public:
         {
             Reset();
         }
-
+        EventMap events;
         uint32 _visualTimer;
         uint32 _spellTimer;
 
         void Reset()
         {
             me->CastSpell(me, SPELL_RECENTLY_SPAWNED, true);
+            events.ScheduleEvent(EVENT_EMERGE, 0);
             //me->CastSpell(me, SPELL_EMPOWERED_PASSIVE, true);
             if (Aura* aur = me->AddAura(SPELL_EMPOWERED_PASSIVE, me))
                 aur->SetStackAmount(9);
@@ -1823,6 +1823,16 @@ public:
         {
             if (!UpdateVictim())
                 return;
+
+                if (me->HasUnitState(UNIT_STATE_CASTING))
+                    return;
+
+                switch (events.ExecuteEvent())
+                {
+                    case EVENT_EMERGE:
+                        me->CastSpell(me, SPELL_EMERGE, false);
+                        break;
+                }
 
             if (_visualTimer)
             {
