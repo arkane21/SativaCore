@@ -48,9 +48,10 @@ enum SpellData
     SPELL_SPINNING_UP                               = 63414,
 
     // PHASE 3:
-    SPELL_PLASMA_BALL_25                            = 63689,
+    SPELL_PLASMA_BALL_25                            = 64535,
     SPELL_PLASMA_BALL_10                            = 63689,
-    SPELL_DAMAGE_SPELL_20                           = 56258,
+    SPELL_PLASMA_BALL_25_P4                         = 65648,
+    SPELL_PLASMA_BALL_10_P4                         = 65647,
 
     SPELL_MAGNETIC_CORE                             = 64436,
     SPELL_SPINNING                                  = 64438,
@@ -189,7 +190,6 @@ enum EVENTS
     EVENT_MAGNETIC_CORE_PULL_DOWN                   = 42,
     EVENT_MAGNETIC_CORE_FREE                        = 43,
     EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE           = 44,
-    EVENT_DAMAGE                                    = 45,
 
     // Hard mode:
     EVENT_COMPUTER_SAY_INITIATED                    = 60,
@@ -234,6 +234,7 @@ enum SOUNDS
 #define SPELL_PLASMA_BLAST                          RAID_MODE(SPELL_PLASMA_BLAST_10, SPELL_PLASMA_BLAST_25)
 #define SPELL_MINE_EXPLOSION                        RAID_MODE(SPELL_MINE_EXPLOSION_10, SPELL_MINE_EXPLOSION_25)
 #define SPELL_PLASMA_BALL                           RAID_MODE(SPELL_PLASMA_BALL_10, SPELL_PLASMA_BALL_25)
+#define SPELL_PLASMA_BALL_P4                        RAID_MODE(SPELL_PLASMA_BALL_10_P4, SPELL_PLASMA_BALL_25_P4)
 #define SPELL_HAND_PULSE_R                          RAID_MODE(SPELL_HAND_PULSE_10_R, SPELL_HAND_PULSE_25_R)
 #define SPELL_HAND_PULSE_L                          RAID_MODE(SPELL_HAND_PULSE_10_L, SPELL_HAND_PULSE_25_L)
 #define SPELL_FROST_BOMB_EXPLOSION                  RAID_MODE(SPELL_FROST_BOMB_EXPLOSION_10, SPELL_FROST_BOMB_EXPLOSION_25)
@@ -1810,15 +1811,13 @@ public:
                         {
                             if( Unit* victim = me->GetVictim() )
                                 me->CastSpell(victim, SPELL_PLASMA_BALL, false);
-                                events.ScheduleEvent(EVENT_DAMAGE, 0);
                         }
                         else
                         {
                             if( Unit* victim = me->GetVictim() )
                             {
                                 me->SetFacingToObject(victim);
-                                me->CastSpell(victim, SPELL_PLASMA_BALL, false);
-                                events.ScheduleEvent(EVENT_DAMAGE, 0);
+                                me->CastSpell(victim, SPELL_PLASMA_BALL_P4, false);
                             }
                         }
                     }
@@ -1866,13 +1865,6 @@ public:
                     break;
                 case EVENT_MAGNETIC_CORE_REMOVE_IMMOBILIZE:
                     immobilized = false;
-                    break;
-                case EVENT_DAMAGE:
-                if (Is25ManRaid())
-                {
-                  me->CastSpell(me, SPELL_DAMAGE_SPELL_20);
-                  events.RepeatEvent(10000000); //Prevenir k el aura se acumule de forma infinita
-                }
                     break;
             }
         }
