@@ -1206,7 +1206,8 @@ public:
             switch (events.ExecuteEvent())
             {
                 case EVENT_ANCIENT_CONSERVATOR_NATURE_FURY:
-                    me->CastSpell(me->GetVictim(), SPELL_NATURE_FURY, false);
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                       me->CastSpell(target, SPELL_NATURE_FURY, false);
                     events.RepeatEvent(14000);
                     break;
                 case EVENT_ANCIENT_CONSERVATOR_GRIP:
