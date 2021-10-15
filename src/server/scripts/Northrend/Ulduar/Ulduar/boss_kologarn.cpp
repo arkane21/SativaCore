@@ -22,7 +22,7 @@ enum KologarnSays
     SAY_DEATH = 6,
     SAY_BERSERK = 7,
     EMOTE_STONE_GRIP = 8,
-    EMOTE_EYES = 9
+    EMOTE_EYES = 9,
 };
 
 enum KologarnSpells
@@ -90,6 +90,7 @@ enum KologarnEvents
     EVENT_FOCUSED_EYEBEAM = 6,
     EVENT_STONE_SHOUT = 7,
     EVENT_PREPARE_BREATH = 8, // Kologarn can't cast breath on pull
+    EVENT_DISPEL = 9,
 };
 
 enum KologarnNPCs
@@ -130,7 +131,7 @@ class boss_kologarn : public CreatureScript
 public:
     boss_kologarn() : CreatureScript("boss_kologarn") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const 
+    CreatureAI* GetAI(Creature* pCreature) const
     {
         return new boss_kologarnAI(pCreature);
     }
@@ -144,6 +145,9 @@ public:
             eyebeamTarget = nullptr;
             assert(vehicle);
             me->SetStandState(UNIT_STAND_STATE_SUBMERGED);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* m_pInstance;
@@ -158,7 +162,7 @@ public:
         bool _looksAchievement, breathReady;
         uint8 _rubbleAchievement;
 
-        void MoveInLineOfSight(Unit* who) 
+        void MoveInLineOfSight(Unit* who)
         {
             if (who->GetTypeId() == TYPEID_PLAYER && me->GetExactDist2d(who) < 45.0f && me->getStandState() == UNIT_STAND_STATE_SUBMERGED)
             {
@@ -173,7 +177,7 @@ public:
                 ScriptedAI::MoveInLineOfSight(who);
         }
 
-        void EnterEvadeMode() 
+        void EnterEvadeMode()
         {
             if (!_EnterEvadeMode())
                 return;
@@ -217,7 +221,7 @@ public:
             }
         }
 
-        void Reset() 
+        void Reset()
         {
             _rubbleAchievement = 0;
             _looksAchievement = true;
@@ -243,7 +247,7 @@ public:
                 door->SetGoState(GO_STATE_ACTIVE);
         }
 
-        void DoAction(int32 param) 
+        void DoAction(int32 param)
         {
             if (param == DATA_KOLOGARN_LOOKS_ACHIEV)
                 _looksAchievement = false;
@@ -257,7 +261,7 @@ public:
             }
         }
 
-        uint32 GetData(uint32 param) const 
+        uint32 GetData(uint32 param) const
         {
             if (param == DATA_KOLOGARN_LOOKS_ACHIEV)
                 return _looksAchievement;
@@ -269,18 +273,18 @@ public:
             return 0;
         }
 
-        void AttackStart(Unit* who) 
+        void AttackStart(Unit* who)
         {
             me->Attack(who, true);
         }
 
-        void JustSummoned(Creature* cr) 
+        void JustSummoned(Creature* cr)
         {
             if (cr->GetEntry() != NPC_LEFT_ARM && cr->GetEntry() != NPC_RIGHT_ARM)
                 summons.Summon(cr);
         }
 
-        void JustDied(Unit*) 
+        void JustDied(Unit*)
         {
             summons.DespawnAll();
             me->StopMoving();
@@ -305,7 +309,7 @@ public:
                 arm->DespawnOrUnsummon(3000); // visual
         }
 
-        void KilledUnit(Unit*) 
+        void KilledUnit(Unit*)
         {
             if (!urand(0, 2))
                 return;
@@ -313,7 +317,7 @@ public:
             Talk(SAY_SLAY);
         }
 
-        void PassengerBoarded(Unit* who, int8  /*seatId*/, bool apply) 
+        void PassengerBoarded(Unit* who, int8  /*seatId*/, bool apply)
         {
             if (!me->IsAlive())
                 return;
@@ -346,7 +350,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask) 
+        void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask)
         {
             if (who && who->GetEntry() == me->GetEntry() && me->GetHealth())
             {
@@ -355,7 +359,7 @@ public:
             }
         }
 
-        void EnterCombat(Unit*  /*who*/) 
+        void EnterCombat(Unit*  /*who*/)
         {
             if (m_pInstance)
                 m_pInstance->SetData(TYPE_KOLOGARN, IN_PROGRESS);
@@ -365,6 +369,7 @@ public:
             events.ScheduleEvent(EVENT_GRIP, 15000);
             events.ScheduleEvent(EVENT_FOCUSED_EYEBEAM, 10000);
             events.ScheduleEvent(EVENT_PREPARE_BREATH, 3000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             //events.ScheduleEvent(EVENT_ENRAGE, x); no info
 
             Talk(SAY_AGGRO);
@@ -375,7 +380,7 @@ public:
                 door->SetGoState(GO_STATE_READY);
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 diff)
         {
             if (!UpdateVictim())
             {
@@ -400,6 +405,10 @@ public:
 
                 me->CastSpell(me->GetVictim(), SPELL_STONE_SHOUT, false);
                 events.ScheduleEvent(EVENT_STONE_SHOUT, 2000);
+                break;
+            case EVENT_DISPEL:
+                me->RemoveAura(68605);
+                events.RepeatEvent(500);
                 break;
             case EVENT_SMASH:
                 if (_left && _right)
@@ -485,30 +494,36 @@ class boss_kologarn_arms : public CreatureScript
 public:
     boss_kologarn_arms() : CreatureScript("boss_kologarn_arms") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const 
+    CreatureAI* GetAI(Creature* pCreature) const
     {
         return new boss_kologarn_armsAI(pCreature);
     }
 
     struct boss_kologarn_armsAI : public ScriptedAI
     {
-        boss_kologarn_armsAI(Creature* c) : ScriptedAI(c) { }
+        boss_kologarn_armsAI(Creature* c) : ScriptedAI(c)
+        {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
+        }
 
         int32 _damageDone;
         bool _combatStarted;
+        EventMap events;
 
         void EnterEvadeMode()  {}
         void MoveInLineOfSight(Unit*)  {}
         void AttackStart(Unit*)  {}
         void UpdateAI(uint32  /*diff*/)  {}
 
-        void Reset() 
+        void Reset()
         {
             _combatStarted = false;
             _damageDone = 0;
         }
 
-        void PassengerBoarded(Unit*  /*who*/, int8  /*seatId*/, bool apply) 
+        void PassengerBoarded(Unit*  /*who*/, int8  /*seatId*/, bool apply)
         {
             if (!apply)
                 _damageDone = 0;
@@ -520,7 +535,7 @@ public:
             }
         }
 
-        void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask) 
+        void DamageTaken(Unit* who, uint32& damage, DamageEffectType, SpellSchoolMask)
         {
             if (!_combatStarted)
                 if (InstanceScript* instance = me->GetInstanceScript())
@@ -539,7 +554,7 @@ public:
             }
         }
 
-        void JustDied(Unit*) 
+        void JustDied(Unit*)
         {
             float x, y, z;
             // left arm
@@ -585,7 +600,7 @@ class boss_kologarn_eyebeam : public CreatureScript
 public:
     boss_kologarn_eyebeam() : CreatureScript("boss_kologarn_eyebeam") { }
 
-    CreatureAI* GetAI(Creature* pCreature) const 
+    CreatureAI* GetAI(Creature* pCreature) const
     {
         return new boss_kologarn_eyebeamAI(pCreature);
     }
@@ -600,7 +615,7 @@ public:
         uint32 _timer;
         bool _damaged, justSpawned;
 
-        void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/) 
+        void DamageDealt(Unit* /*victim*/, uint32& damage, DamageEffectType /*damageType*/)
         {
             if (damage > 0 && !_damaged && me->GetInstanceScript())
             {
@@ -610,7 +625,7 @@ public:
             }
         }
 
-        void UpdateAI(uint32 diff) 
+        void UpdateAI(uint32 diff)
         {
             if (justSpawned)
             {
@@ -666,7 +681,7 @@ public:
     {
         PrepareSpellScript(spell_ulduar_stone_grip_cast_target_SpellScript);
 
-        bool Load() 
+        bool Load()
         {
             if (GetCaster()->GetTypeId() != TYPEID_UNIT)
                 return false;
@@ -691,13 +706,13 @@ public:
             }
         }
 
-        void Register() 
+        void Register()
         {
             OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_ulduar_stone_grip_cast_target_SpellScript::FilterTargetsInitial, EFFECT_ALL, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
-    SpellScript* GetSpellScript() const 
+    SpellScript* GetSpellScript() const
     {
         return new spell_ulduar_stone_grip_cast_target_SpellScript();
     }
@@ -718,13 +733,13 @@ public:
                 owner->RemoveAurasDueToSpell(aurEff->GetAmount());
         }
 
-        void Register() 
+        void Register()
         {
             OnEffectRemove += AuraEffectRemoveFn(spell_ulduar_stone_grip_AuraScript::OnRemoveStun, EFFECT_2, SPELL_AURA_MOD_STUN, AURA_EFFECT_HANDLE_REAL);
         }
     };
 
-    AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const
     {
         return new spell_ulduar_stone_grip_AuraScript();
     }
@@ -748,13 +763,13 @@ public:
             GetHitPlayer()->ExitVehicle();
         }
 
-        void Register() 
+        void Register()
         {
             OnEffectHitTarget += SpellEffectFn(spell_ulduar_squeezed_lifeless_SpellScript::HandleInstaKill, EFFECT_1, SPELL_EFFECT_INSTAKILL);
         }
     };
 
-    SpellScript* GetSpellScript() const 
+    SpellScript* GetSpellScript() const
     {
         return new spell_ulduar_squeezed_lifeless_SpellScript();
     }
@@ -776,14 +791,14 @@ public:
                 caster->CastSpell(caster, triggerSpellId, false);
         }
 
-        void Register() 
+        void Register()
         {
             if (m_scriptSpellId == SPELL_STONE_SHOUT_10 || m_scriptSpellId == SPELL_STONE_SHOUT_25)
                 OnEffectPeriodic += AuraEffectPeriodicFn(spell_kologarn_stone_shout_AuraScript::OnPeriodic, EFFECT_0, SPELL_AURA_PERIODIC_TRIGGER_SPELL);
         }
     };
 
-    AuraScript* GetAuraScript() const 
+    AuraScript* GetAuraScript() const
     {
         return new spell_kologarn_stone_shout_AuraScript();
     }
@@ -797,14 +812,14 @@ public:
             targets.remove_if(PlayerOrPetCheck());
         }
 
-        void Register() 
+        void Register()
         {
             if (m_scriptSpellId != SPELL_STONE_SHOUT_10 && m_scriptSpellId != SPELL_STONE_SHOUT_25)
                 OnObjectAreaTargetSelect += SpellObjectAreaTargetSelectFn(spell_kologarn_stone_shout_SpellScript::FilterTargets, EFFECT_0, TARGET_UNIT_SRC_AREA_ENEMY);
         }
     };
 
-    SpellScript* GetSpellScript() const 
+    SpellScript* GetSpellScript() const
     {
         return new spell_kologarn_stone_shout_SpellScript();
     }
@@ -815,7 +830,7 @@ class achievement_kologarn_looks_could_kill : public AchievementCriteriaScript
 public:
     achievement_kologarn_looks_could_kill() : AchievementCriteriaScript("achievement_kologarn_looks_could_kill") {}
 
-    bool OnCheck(Player*  /*player*/, Unit* target) 
+    bool OnCheck(Player*  /*player*/, Unit* target)
     {
         if (target)
             if (InstanceScript* instance = target->GetInstanceScript())
@@ -831,7 +846,7 @@ class achievement_kologarn_rubble_and_roll : public AchievementCriteriaScript
 public:
     achievement_kologarn_rubble_and_roll() : AchievementCriteriaScript("achievement_kologarn_rubble_and_roll") {}
 
-    bool OnCheck(Player*  /*player*/, Unit* target) 
+    bool OnCheck(Player*  /*player*/, Unit* target)
     {
         if (target)
             if (InstanceScript* instance = target->GetInstanceScript())
@@ -847,7 +862,7 @@ class achievement_kologarn_with_open_arms : public AchievementCriteriaScript
 public:
     achievement_kologarn_with_open_arms() : AchievementCriteriaScript("achievement_kologarn_with_open_arms") {}
 
-    bool OnCheck(Player*  /*player*/, Unit* target) 
+    bool OnCheck(Player*  /*player*/, Unit* target)
     {
         if (target)
             if (InstanceScript* instance = target->GetInstanceScript())

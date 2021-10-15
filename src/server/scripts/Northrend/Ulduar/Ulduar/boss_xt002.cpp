@@ -65,6 +65,7 @@ enum XT002Events
     EVENT_START_SECOND_PHASE    = 7,
     EVENT_REMOVE_EMOTE          = 8,
     EVENT_CHECK_ROOM            = 9,
+    EVENT_DISPEL               = 10,
 };
 
 enum NPCs
@@ -122,6 +123,9 @@ public:
         boss_xt002AI(Creature* pCreature) : ScriptedAI(pCreature), summons(me)
         {
             m_pInstance = pCreature->GetInstanceScript();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* m_pInstance;
@@ -136,6 +140,7 @@ public:
         {
             events.RescheduleEvent(EVENT_GRAVITY_BOMB, 1000, 1);
             events.RescheduleEvent(EVENT_TYMPANIC_TANTARUM, 60000, 1);
+            events.RescheduleEvent(EVENT_DISPEL, 500);
             if (!_hardMode)
                 events.RescheduleEvent(EVENT_HEALTH_CHECK, 2000, 1);
         }
@@ -350,6 +355,10 @@ public:
                     me->CastSpell(me, SPELL_TYMPANIC_TANTARUM, true);
                     events.RepeatEvent(60000);
                     return;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_ENRAGE:
                     me->MonsterYell("I'm tired of these toys. I don't want to play anymore!", LANG_UNIVERSAL, 0);
                     me->PlayDirectSound(XT_SOUND_ENRAGE);

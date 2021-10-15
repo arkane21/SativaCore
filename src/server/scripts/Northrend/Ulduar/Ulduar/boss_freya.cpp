@@ -174,6 +174,8 @@ enum FreyaEvents
     EVENT_STORM_LASHER_VISUAL                   = 52,
     EVENT_DETONANING_VISUAL                     = 53,
     EVENT_DETONATING_LASHER_FLAME_LASH          = 55,
+
+    EVENT_DISPEL                                = 56,
 };
 
 enum FreyaSounds
@@ -267,6 +269,9 @@ public:
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_FREYA, DONE);
             memset(_elderGUID, 0, sizeof(_elderGUID));
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* m_pInstance;
@@ -393,9 +398,9 @@ public:
             {
                 me->MonsterYell("Children, assist me!", LANG_UNIVERSAL, 0);
                 me->PlayDirectSound(SOUND_TRIO);
-                me->SummonCreature(NPC_ANCIENT_WATER_SPIRIT, me->GetPositionX() + urand(5, 15), me->GetPositionY() + urand(5, 15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT));
-                me->SummonCreature(NPC_STORM_LASHER, me->GetPositionX() + urand(5, 15), me->GetPositionY() + urand(5, 15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT));
-                me->SummonCreature(NPC_SNAPLASHER, me->GetPositionX() + urand(5, 15), me->GetPositionY() + urand(5, 15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT));
+                me->SummonCreature(NPC_ANCIENT_WATER_SPIRIT, me->GetPositionX() + urand(5, 15), me->GetPositionY() + urand(5, 15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 90000);
+                me->SummonCreature(NPC_STORM_LASHER, me->GetPositionX() + urand(5, 15), me->GetPositionY() + urand(5, 15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 90000);
+                me->SummonCreature(NPC_SNAPLASHER, me->GetPositionX() + urand(5, 15), me->GetPositionY() + urand(5, 15), me->GetMap()->GetHeight(me->GetPositionX(), me->GetPositionY(), MAX_HEIGHT), 0, TEMPSUMMON_CORPSE_TIMED_DESPAWN, 90000);
             }
             // Ancient Conservator
             else if (_waveNumber == 2)
@@ -498,6 +503,7 @@ public:
             events.ScheduleEvent(EVENT_FREYA_ADDS_SPAM, 10000, 0, EVENT_PHASE_ADDS);
             events.ScheduleEvent(EVENT_FREYA_LIFEBINDER, 30000);
             events.ScheduleEvent(EVENT_FREYA_SUNBEAM, 17000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             events.ScheduleEvent(EVENT_FREYA_BERSERK, 600000);
             events.SetPhase(EVENT_PHASE_ADDS);
 
@@ -638,6 +644,10 @@ public:
                     me->PlayDirectSound(SOUND_BERSERK);
                     me->CastSpell(me, SPELL_BERSERK, true);
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_FREYA_GROUND_TREMOR:
                     me->CastSpell(me, SPELL_GROUND_TREMOR_FREYA, false);
                     events.RepeatEvent(25000 + urand(0, 10000));
@@ -682,6 +692,9 @@ public:
     {
         boss_freya_elder_stonebarkAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -728,6 +741,7 @@ public:
             events.ScheduleEvent(EVENT_STONEBARK_FISTS_OF_STONE, 40000);
             events.ScheduleEvent(EVENT_STONEBARK_GROUND_TREMOR, 5000);
             events.ScheduleEvent(EVENT_STONEBARK_PETRIFIED_BARK, 20000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
 
             me->MonsterYell("This place will serve as your graveyard.", LANG_UNIVERSAL, 0);
             me->PlayDirectSound(SOUND_STONEBARK_AGGRO);
@@ -767,6 +781,10 @@ public:
                     me->CastSpell(me, SPELL_PETRIFIED_BARK, false);
                     events.RepeatEvent(30000);
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
             }
 
             DoMeleeAttackIfReady();
@@ -788,6 +806,9 @@ public:
     {
         boss_freya_elder_brightleafAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature)
         {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -834,6 +855,7 @@ public:
             events.ScheduleEvent(EVENT_BRIGHTLEAF_FLUX, 10000);
             events.ScheduleEvent(EVENT_BRIGHTLEAF_SOLAR_FLARE, 5000);
             events.ScheduleEvent(EVENT_BRIGHTLEAF_UNSTABLE_SUN_BEAM, 8000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
 
             me->MonsterYell("Matron, the Conservatory has been breached!", LANG_UNIVERSAL, 0);
             me->PlayDirectSound(SOUND_BRIGHTLEAF_AGGRO);
@@ -890,6 +912,10 @@ public:
 
                     summons.DespawnAll();
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
             }
 
             DoMeleeAttackIfReady();
@@ -911,6 +937,9 @@ public:
     {
         boss_freya_elder_ironbranchAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -955,6 +984,7 @@ public:
             events.ScheduleEvent(EVENT_IRONBRANCH_IMPALE, 10000);
             events.ScheduleEvent(EVENT_IRONBRANCH_IRON_ROOT, 15000);
             events.ScheduleEvent(EVENT_IRONBRANCH_THORN_SWARM, 3000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
 
             me->MonsterYell("Mortals have no place here!", LANG_UNIVERSAL, 0);
             me->PlayDirectSound(SOUND_IRONBRANCH_AGGRO);
@@ -983,6 +1013,10 @@ public:
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         me->CastSpell(target->GetPositionX(), target->GetPositionY(), target->GetPositionZ(), SPELL_THORN_SWARM, false);
                     events.RepeatEvent(14000);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
             }
 
@@ -1118,6 +1152,9 @@ public:
             _freyaGUID = me->GetInstanceScript() ? me->GetInstanceScript()->GetData64(TYPE_FREYA) : 0;
             _isTrio = me->GetEntry() == NPC_ANCIENT_WATER_SPIRIT || me->GetEntry() == NPC_STORM_LASHER || me->GetEntry() == NPC_SNAPLASHER;
             _hasDied = false;
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -1167,11 +1204,13 @@ public:
                 me->CastSpell(me, SPELL_HEALTHY_SPORE_SUMMON, true);
                 events.ScheduleEvent(EVENT_ANCIENT_CONSERVATOR_GRIP, 50);
                 events.ScheduleEvent(EVENT_ANCIENT_CONSERVATOR_NATURE_FURY, 14000);
+                events.ScheduleEvent(EVENT_DISPEL, 500);
                 _stackCount = ACTION_REMOVE_25_STACK;
             }
             else if (me->GetEntry() == NPC_ANCIENT_WATER_SPIRIT)
             {
                 events.ScheduleEvent(EVENT_WATER_SPIRIT_CHARGE, 12000);
+                events.ScheduleEvent(EVENT_DISPEL, 500);
                 _stackCount = ACTION_REMOVE_10_STACK;
             }
             else if (me->GetEntry() == NPC_STORM_LASHER)
@@ -1179,17 +1218,20 @@ public:
                 events.ScheduleEvent(EVENT_STORM_LASHER_VISUAL, 50);
                 events.ScheduleEvent(EVENT_STORM_LASHER_LIGHTNING_LASH, 10000);
                 events.ScheduleEvent(EVENT_STORM_LASHER_STORMBOLT, 6000);
+                events.ScheduleEvent(EVENT_DISPEL, 500);
                 _stackCount = ACTION_REMOVE_10_STACK;
             }
             else if (me->GetEntry() == NPC_DETONATING_LASHER)
             {
                 events.ScheduleEvent(EVENT_DETONANING_VISUAL, 0);
                 events.ScheduleEvent(EVENT_DETONATING_LASHER_FLAME_LASH, 10000);
+                events.ScheduleEvent(EVENT_DISPEL, 500);
                 _stackCount = ACTION_REMOVE_2_STACK;
             }
             else if (me->GetEntry() == NPC_SNAPLASHER)
             {
                 me->CastSpell(me, SPELL_HARDENED_BARK, true);
+                events.ScheduleEvent(EVENT_DISPEL, 500);
                 _stackCount = ACTION_REMOVE_10_STACK;
             }
         }
@@ -1238,6 +1280,10 @@ public:
                     break;
                 case EVENT_DETONANING_VISUAL:
                     me->CastSpell(me, SPELL_DETONATING_VISUAL, false);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
                 case EVENT_DETONATING_LASHER_FLAME_LASH:
                     me->CastSpell(me->GetVictim(), SPELL_FLAME_LASH, false);

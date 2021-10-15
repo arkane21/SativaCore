@@ -162,6 +162,8 @@ enum YoggEvents
     EVENT_YS_DEAFENING_ROAR             = 31,
     EVENT_YS_SUMMON_GUARDIAN            = 32,
     EVENT_YS_SHADOW_BEACON              = 33,
+
+    EVENT_DISPEL                        = 34,
 };
 
 enum NPCsGOs
@@ -979,13 +981,20 @@ public:
 
     struct boss_yoggsaron_guardian_of_ysAI : public ScriptedAI
     {
-        boss_yoggsaron_guardian_of_ysAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+        boss_yoggsaron_guardian_of_ysAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
+        }
 
         uint32 _spellTimer;
+        uint32 _dispellTimer;
 
         void Reset()
         {
             _spellTimer = 0;
+            _dispellTimer = 0;
             me->SetInCombatWithZone();
         }
 
@@ -1005,7 +1014,11 @@ public:
                 me->CastSpell(me, SPELL_DARK_VOLLEY, false);
                 _spellTimer = 0;
             }
-
+            if (_dispellTimer >= 500);
+            {
+              me->RemoveAura(68605);
+              _dispellTimer = 0;
+            }
             DoMeleeAttackIfReady();
         }
     };
@@ -1042,6 +1055,9 @@ public:
                         --_count;
                     }
             }
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* m_pInstance;
@@ -1121,6 +1137,7 @@ public:
                 events.ScheduleEvent(EVENT_YS_LUNATIC_GAZE, 7000);
                 events.ScheduleEvent(EVENT_YS_SHADOW_BEACON, 20000);
                 events.ScheduleEvent(EVENT_YS_SUMMON_GUARDIAN, 0);
+                events.ScheduleEvent(EVENT_DISPEL, 500);
                 _thirdPhase = true;
 
                 me->MonsterYell("Look upon the true face of death and know that your end comes soon!", LANG_UNIVERSAL, 0);
@@ -1185,6 +1202,10 @@ public:
                     events.RepeatEvent(5000);
                     me->CastCustomSpell(SPELL_SHADOW_BEACON, SPELLVALUE_MAX_TARGETS, RAID_MODE(1, 3), me, false);
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_YS_SUMMON_GUARDIAN:
                     SummonImmortalGuardian();
                     events.RepeatEvent(10000);
@@ -1214,15 +1235,22 @@ public:
             _induceTimer = 0;
             _brainDamaged = false;
             me->SetRegeneratingHealth(false);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         bool _brainDamaged;
         uint8 _tentacleCount;
         uint8 _activeIllusion;
         uint32 _induceTimer;
+        uint32 _dispellTimer;
         SummonList summons;
 
-        void Reset() { }
+        void Reset()
+        {
+          _dispellTimer = 0;
+        }
         void JustSummoned(Creature* cr)
         {
             if (cr->GetEntry() == NPC_INFLUENCE_TENTACLE)
@@ -1426,6 +1454,12 @@ public:
         {
             if (_induceTimer)
                 _induceTimer += diff;
+
+           if (_dispellTimer >= 500)
+                {
+                  me->RemoveAura(68605);
+                  _dispellTimer = 0;
+                }
         }
     };
 };
@@ -1488,11 +1522,17 @@ public:
             me->CastSpell(me, SPELL_CRUSH, true);
             me->CastSpell(me, SPELL_FOCUSED_ANGER, true);
             me->CastSpell(me, SPELL_DIMINISH_POWER, false);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
+
+        uint32 _dispellTimer;
 
         void Reset()
         {
             me->SetInCombatWithZone();
+            _dispellTimer = 0;
         }
 
         void DamageTaken(Unit* who, uint32&, DamageEffectType damagetype, SpellSchoolMask)
@@ -1500,6 +1540,7 @@ public:
             if (who && damagetype == DIRECT_DAMAGE)
             {
                 me->InterruptNonMeleeSpells(false);
+                me->RemoveAura(68605);
             }
         }
 
@@ -1524,7 +1565,14 @@ public:
                 return;
 
             me->CastSpell(me, SPELL_DIMINISH_POWER, false);
+            me->RemoveAura(68605);
             DoResetThreat();
+
+            if (_dispellTimer >= 500)
+            {
+              me->RemoveAura(68605);
+              _dispellTimer = 0;
+            }
         }
     };
 };
@@ -1544,6 +1592,9 @@ public:
         boss_yoggsaron_corruptor_tentacleAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             SetCombatMovement(false);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         void DoAction(int32 param)
@@ -1603,6 +1654,9 @@ public:
             SetCombatMovement(false);
             _checkTimer = 1;
             _playerGUID = 0;
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         uint32 _checkTimer;
@@ -1788,6 +1842,9 @@ public:
         boss_yoggsaron_immortal_guardianAI(Creature* pCreature) : ScriptedAI(pCreature)
         {
             Reset();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
         EventMap events;
         uint32 _visualTimer;
@@ -1797,6 +1854,7 @@ public:
         {
             me->CastSpell(me, SPELL_RECENTLY_SPAWNED, true);
             events.ScheduleEvent(EVENT_EMERGE, 0);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             //me->CastSpell(me, SPELL_EMPOWERED_PASSIVE, true);
             if (Aura* aur = me->AddAura(SPELL_EMPOWERED_PASSIVE, me))
                 aur->SetStackAmount(9);
@@ -1831,6 +1889,10 @@ public:
                 {
                     case EVENT_EMERGE:
                         me->CastSpell(me, SPELL_EMERGE, false);
+                        break;
+                    case EVENT_DISPEL:
+                        me->RemoveAura(68605);
+                        events.RepeatEvent(500);
                         break;
                 }
 

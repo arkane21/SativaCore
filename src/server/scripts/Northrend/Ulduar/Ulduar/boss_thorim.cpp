@@ -44,6 +44,7 @@ enum ThorimSpells
     SPELL_VIPER                             = 34074,
     SPELL_WEAKNESS                          = 70728,
     SPELL_QUAD                              = 70747,
+    SPELL_IRON_MIGHT                        = 51484,
 
     // DARK RUNE ACOLYTE
     SPELL_GREATER_HEAL_10                   = 62334,
@@ -239,6 +240,8 @@ enum ThorimEvents
 
     EVENT_DR_COMMONER_PM                    = 140,
     EVENT_DR_COMMONER_LB                    = 141,
+
+    EVENT_DISPEL                            = 142,
 };
 
 const Position ArenaNPCs[] =
@@ -325,6 +328,9 @@ public:
             if ((_encounterFinished = (!me->IsAlive())))
                 if (m_pInstance)
                     m_pInstance->SetData(TYPE_THORIM, DONE);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         bool _isArenaEmpty;
@@ -531,6 +537,7 @@ public:
                 events.ScheduleEvent(EVENT_THORIM_UNBALANCING_STRIKE, 8000, 0, EVENT_PHASE_RING);
                 events.ScheduleEvent(EVENT_THORIM_LIGHTNING_CHARGE, 12500, 0, EVENT_PHASE_RING);
                 events.ScheduleEvent(EVENT_THORIM_CHAIN_LIGHTNING, 13000, 0, EVENT_PHASE_RING);
+                events.ScheduleEvent(EVENT_DISPEL, 500, 0, EVENT_PHASE_RING);
                 events.ScheduleEvent(EVENT_THORIM_BERSERK, 300000, 0, EVENT_PHASE_RING);
 
                 me->GetMotionMaster()->MoveChase(me->GetVictim());
@@ -756,6 +763,10 @@ public:
                         me->CastSpell(target, SPELL_CHAIN_LIGHTNING, false);
                     events.RepeatEvent(15000);
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_THORIM_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, true);
                     me->MonsterYell("My patience has reached its limit!", LANG_UNIVERSAL, 0);
@@ -894,6 +905,7 @@ public:
                     me->CastSpell(me, SPELL_VIPER, false);
                     me->CastSpell(me, SPELL_WEAKNESS, false);
                     me->CastSpell(me, SPELL_QUAD, false);
+                    me->CastSpell(me, SPELL_IRON_MIGHT, false);
                     me->MonsterYell("Impossible! Lord Thorim, I will bring your foes a frigid death!", LANG_UNIVERSAL, 0);
                     events.ScheduleEvent(EVENT_SIF_FROST_NOVA_START, 1000);
                     events.ScheduleEvent(EVENT_SIF_FROSTBOLT_VALLEY, 11000);
@@ -922,6 +934,7 @@ public:
                 case EVENT_SIF_REAURA:
                     me->CastSpell(me, SPELL_WEAKNESS, false);
                     me->CastSpell(me, SPELL_QUAD, false);
+                    me->CastSpell(me, SPELL_IRON_MIGHT, false);
                     events.RepeatEvent(5000);
                     return;
             }

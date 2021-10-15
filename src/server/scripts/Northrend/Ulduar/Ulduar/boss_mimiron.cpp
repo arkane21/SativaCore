@@ -203,6 +203,8 @@ enum EVENTS
     EVENT_SUMMON_EMERGENCY_FIRE_BOTS                = 68,
     EVENT_EMERGENCY_BOT_CHECK                       = 69,
     EVENT_EMERGENCY_BOT_ATTACK                      = 70,
+
+    EVENT_DISPEL                                    = 71,
 };
 
 
@@ -1007,6 +1009,9 @@ public:
         {
             pInstance = me->GetInstanceScript();
             bIsEvading = false;
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* pInstance;
@@ -1048,6 +1053,7 @@ public:
                         events.Reset();
                         events.ScheduleEvent(EVENT_SPELL_NAPALM_SHELL, 3000);
                         events.ScheduleEvent(EVENT_SPELL_PLASMA_BLAST, 10000);
+                        events.ScheduleEvent(EVENT_DISPEL, 50);
                         events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 20000);
                         events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
                         if (Creature* c = GetMimiron())
@@ -1063,6 +1069,7 @@ public:
                         DoZoneInCombat();
                         events.Reset();
                         events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 20000);
+                        events.ScheduleEvent(EVENT_DISPEL, 50);
                         events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
                         break;
 
@@ -1163,6 +1170,10 @@ public:
                         cannon->CastSpell(victim, SPELL_PLASMA_BLAST, false);
                     }
                     events.RepeatEvent(22000);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(50);
                     break;
                 case EVENT_SPELL_SHOCK_BLAST:
                     me->CastSpell(me->GetVictim(), SPELL_SHOCK_BLAST, false);
@@ -1289,6 +1300,9 @@ public:
         {
             pInstance = me->GetInstanceScript();
             bIsEvading = false;
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* pInstance;
@@ -1333,6 +1347,7 @@ public:
                         events.ScheduleEvent(EVENT_SPELL_HEAT_WAVE, 10000);
                         events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
                         events.ScheduleEvent(EVENT_SPELL_RAPID_BURST, 0);
+                        events.ScheduleEvent(EVENT_DISPEL, 50);
                         events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 30000);
                         events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
                         if (Creature* c = GetMimiron())
@@ -1350,6 +1365,7 @@ public:
                         events.ScheduleEvent(EVENT_REINSTALL_ROCKETS, 3000);
                         events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
                         events.ScheduleEvent(EVENT_HAND_PULSE, 0);
+                        events.ScheduleEvent(EVENT_DISPEL, 50);
                         events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 30000);
                         if (Creature* c = GetMimiron())
                             if (c->AI()->GetData(1))
@@ -1492,6 +1508,10 @@ public:
                         me->SetFacingToObject(p);
                     }
                     events.RepeatEvent(3200);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(50);
                     break;
                 case EVENT_HAND_PULSE:
                     if (Player* p = SelectTargetFromPlayerList(40.0f))
@@ -1636,6 +1656,9 @@ public:
             bIsEvading = false;
             immobilized = false;
             me->SetDisableGravity(true);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* pInstance;
@@ -1678,6 +1701,7 @@ public:
                         events.Reset();
                         events.ScheduleEvent(EVENT_SPELL_PLASMA_BALL, 0);
                         events.ScheduleEvent(EVENT_SUMMON_BOMB_BOT, 15000);
+                        events.ScheduleEvent(EVENT_DISPEL, 50);
                         events.ScheduleEvent(EVENT_SUMMON_ASSAULT_BOT, 1000);
                         events.ScheduleEvent(EVENT_SUMMON_JUNK_BOT, 10000);
                         if (Creature* c = GetMimiron())
@@ -1690,6 +1714,7 @@ public:
                         me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_NOT_SELECTABLE);
                         events.Reset();
                         events.ScheduleEvent(EVENT_SPELL_PLASMA_BALL, 0);
+                        events.ScheduleEvent(EVENT_DISPEL, 50);
 
                 }
             }
@@ -1822,6 +1847,10 @@ public:
                         }
                     }
                     events.RepeatEvent(3000);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(50);
                     break;
                 case EVENT_SUMMON_BOMB_BOT:
                     if( !immobilized )

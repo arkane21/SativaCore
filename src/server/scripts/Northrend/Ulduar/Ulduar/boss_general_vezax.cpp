@@ -84,6 +84,7 @@ enum VezaxEvents
     EVENT_SPELL_PROFOUND_DARKNESS               = 9,
     EVENT_BERSERK                               = 10,
     EVENT_RESTORE_TARGET                        = 11,
+    EVENT_DISPEL                                = 12,
 };
 
 #define TEXT_VEZAX_AGGRO                            "Your destruction will herald a new age of suffering!"
@@ -110,6 +111,9 @@ public:
         boss_vezaxAI(Creature* pCreature) : ScriptedAI(pCreature), summons(me)
         {
             pInstance = pCreature->GetInstanceScript();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -151,6 +155,7 @@ public:
             events.RescheduleEvent(EVENT_SPELL_SURGE_OF_DARKNESS, 63000);
             events.RescheduleEvent(EVENT_SPELL_MARK_OF_THE_FACELESS, 20000);
             events.RescheduleEvent(EVENT_SPELL_SUMMON_SARONITE_VAPORS, 30000);
+            events.RescheduleEvent(EVENT_DISPEL, 500);
             events.RescheduleEvent(EVENT_BERSERK, 600000);
 
             me->MonsterYell(TEXT_VEZAX_AGGRO, LANG_UNIVERSAL, 0);
@@ -247,6 +252,10 @@ public:
                     if(!me->HasAura(SPELL_SARONITE_BARRIER))
                         me->CastSpell(me->GetVictim(), SPELL_SEARING_FLAMES, false);
                     events.RepeatEvent( me->GetMap()->Is25ManRaid() ? 8000 : 15000 );
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
                 case EVENT_SPELL_SURGE_OF_DARKNESS:
                     me->MonsterYell(TEXT_VEZAX_SURGE, LANG_UNIVERSAL, 0);
@@ -439,11 +448,16 @@ public:
                 if( Creature* vezax = ObjectAccessor::GetCreature(*me, pInstance->GetData64(TYPE_VEZAX)) )
                     vezax->AI()->JustSummoned(me);
             timer = 0;
+            dispellTimer = 0;
             me->SetInCombatWithZone();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* pInstance;
         uint16 timer;
+        uint32 dispellTimer;
 
         void JustDied(Unit*  /*killer*/)
         {
@@ -459,10 +473,16 @@ public:
             UpdateVictim();
 
             timer += diff;
+            dispellTimer += diff;
             if (timer >= 2000)
             {
                 me->CastSpell(me, SPELL_PROFOUND_DARKNESS, true);
                 timer -= 2000;
+            }
+            else if (dispellTimer >= 500)
+            {
+              me->RemoveAura(68605);
+              dispellTimer += diff;
             }
 
             DoMeleeAttackIfReady();

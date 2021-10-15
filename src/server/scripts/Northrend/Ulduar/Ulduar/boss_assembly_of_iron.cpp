@@ -92,6 +92,7 @@ enum eEnums
     EVENT_IMMUNE                = 27,
 
     EVENT_ENRAGE                = 30,
+    EVENT_DISPEL                = 31,
 };
 
 enum AssemblyYells
@@ -195,6 +196,9 @@ public:
         boss_steelbreakerAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -227,6 +231,7 @@ public:
             me->SetInCombatWithZone();
             me->CastSpell(me, SPELL_HIGH_VOLTAGE, true);
             events.ScheduleEvent(EVENT_ENRAGE, 900000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             UpdatePhase();
 
             if (!pInstance)
@@ -344,6 +349,10 @@ public:
                     me->CastSpell(me->GetVictim(), SPELL_OVERWHELMING_POWER, true);
                     events.RepeatEvent(RAID_MODE(61000, 36000));
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_ENRAGE:
                     Talk(SAY_STEELBREAKER_BERSERK);
                     me->CastSpell(me, SPELL_BERSERK, true);
@@ -386,6 +395,9 @@ public:
         boss_runemaster_molgeimAI(Creature* c) : ScriptedAI(c), summons(me)
         {
             pInstance = c->GetInstanceScript();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* pInstance;
@@ -420,6 +432,7 @@ public:
             me->setActive(true);
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_ENRAGE, 900000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             UpdatePhase();
 
             if (!pInstance)
@@ -525,6 +538,10 @@ public:
                         me->CastSpell(target, SPELL_RUNE_OF_SUMMONING);
                     events.RepeatEvent(urand(30000, 45000));
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_ENRAGE:
                     me->CastSpell(me, SPELL_BERSERK, true);
                     Talk(SAY_MOLGEIM_BERSERK);
@@ -596,6 +613,9 @@ public:
         boss_stormcaller_brundirAI(Creature* c) : ScriptedAI(c)
         {
             pInstance = c->GetInstanceScript();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -641,6 +661,7 @@ public:
             me->setActive(true);
             me->SetInCombatWithZone();
             events.ScheduleEvent(EVENT_ENRAGE, 900000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);            
             UpdatePhase();
 
             if (!pInstance)
@@ -777,6 +798,10 @@ public:
                     me->CastSpell(me, SPELL_OVERLOAD, true);
                     events.RescheduleEvent(EVENT_OVERLOAD, urand(25000, 40000));
                     events.RescheduleEvent(EVENT_IMMUNE, 5999);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
                 case EVENT_LIGHTNING_WHIRL:
                     Talk(SAY_BRUNDIR_SPECIAL);

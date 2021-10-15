@@ -135,9 +135,10 @@ enum Events
     EVENT_DESPAWN_ALGALON_3         = 38,
     EVENT_DESPAWN_ALGALON_4         = 39,
     EVENT_DESPAWN_ALGALON_5         = 40,
+    EVENT_DISPEL                    = 41,
 
     // Living Constellation
-    EVENT_ARCANE_BARRAGE            = 41,
+    EVENT_ARCANE_BARRAGE            = 42,
 };
 
 enum EncounterPhases
@@ -259,6 +260,9 @@ public:
             _firstPull = true;
             _fightWon = false;
             m_pInstance = me->GetInstanceScript();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -488,6 +492,7 @@ public:
             events.ScheduleEvent(EVENT_ACTIVATE_LIVING_CONSTELLATION, 50500 + introDelay);
             events.ScheduleEvent(EVENT_BIG_BANG, 90000 + introDelay);
             events.ScheduleEvent(EVENT_ASCEND_TO_THE_HEAVENS, 360000 + introDelay);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
 
             events.ScheduleEvent(EVENT_CHECK_HERALD_ITEMS, 5000);
             DoCheckHeraldOfTheTitans();
@@ -699,6 +704,10 @@ public:
                     events.Reset();
                     ScriptedAI::EnterEvadeMode();
                     return;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_OUTRO_START:
                     if (m_pInstance)
                     {
@@ -926,6 +935,9 @@ public:
         npc_living_constellationAI(Creature* creature) : ScriptedAI(creature)
         {
             me->SetReactState(REACT_PASSIVE);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         EventMap events;
@@ -935,6 +947,7 @@ public:
         {
             events.Reset();
             events.ScheduleEvent(EVENT_ARCANE_BARRAGE, 2500);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             _isActive = false;
         }
 
@@ -963,6 +976,10 @@ public:
                     events.SetPhase(PHASE_BIG_BANG);
                     events.DelayEvents(9500);
                     events.ScheduleEvent(EVENT_RESUME_UPDATING, 9500);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
             }
         }

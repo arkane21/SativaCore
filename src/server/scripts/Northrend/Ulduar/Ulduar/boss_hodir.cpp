@@ -125,6 +125,7 @@ enum HodirEvents
     EVENT_MAGE_TOASTY_FIRE              = 18,
     EVENT_MAGE_FIREBALL                 = 19,
     EVENT_MAGE_MELT_ICE                 = 20,
+    EVENT_DISPEL                        = 21,
 };
 
 #define SPELL_FROZEN_BLOWS              RAID_MODE(SPELL_FROZEN_BLOWS_10, SPELL_FROZEN_BLOWS_25)
@@ -203,6 +204,9 @@ public:
             if (!me->IsAlive())
                 if (pInstance)
                     pInstance->SetData(TYPE_HODIR, DONE);
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* pInstance;
@@ -250,6 +254,7 @@ public:
             SmallIcicles(true);
             events.Reset();
             events.RescheduleEvent(EVENT_FLASH_FREEZE, 60000);
+            events.RescheduleEvent(EVENT_DISPEL, 500);
             events.RescheduleEvent(EVENT_FREEZE, 15000);
             events.RescheduleEvent(EVENT_BERSERK, 480000);
             events.RescheduleEvent(EVENT_HARD_MODE_MISSED, 180000);
@@ -461,6 +466,10 @@ public:
                     else if (Unit* plr = SelectTarget(SELECT_TARGET_RANDOM, 0, 50.0f, true))
                         me->CastSpell(plr, SPELL_FREEZE, false);
                     events.RepeatEvent(15000);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
             }
 

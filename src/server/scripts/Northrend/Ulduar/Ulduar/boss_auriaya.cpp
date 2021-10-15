@@ -65,6 +65,7 @@ enum AuriayaEvents
 
     EVENT_RESPAWN_FERAL_DEFENDER        = 9,
     EVENT_ENRAGE                        = 10,
+    EVENT_DISPEL                        = 11,
 };
 
 enum AuriayaSounds
@@ -103,6 +104,9 @@ public:
         boss_auriayaAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature)
         {
             m_pInstance = pCreature->GetInstanceScript();
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* m_pInstance;
@@ -169,6 +173,7 @@ public:
             events.ScheduleEvent(EVENT_GUARDIAN_SWARM, 70000);
             events.ScheduleEvent(EVENT_SUMMON_FERAL_DEFENDER, 60000);
             events.ScheduleEvent(EVENT_SENTINEL_BLAST, 36000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             events.ScheduleEvent(EVENT_ENRAGE, 600000);
 
             summons.DoZoneInCombat(NPC_SANCTUM_SENTRY);
@@ -248,6 +253,10 @@ public:
                     me->CastSpell(me->GetVictim(), SPELL_GUARDIAN_SWARM, false);
                     events.RepeatEvent(40000);
                     break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
+                    break;
                 case EVENT_SENTINEL_BLAST:
                     me->CastSpell(me, SPELL_SENTINEL_BLAST, false);
                     events.RepeatEvent(35000);
@@ -283,10 +292,16 @@ public:
 
     struct npc_auriaya_sanctum_sentryAI : public ScriptedAI
     {
-        npc_auriaya_sanctum_sentryAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+        npc_auriaya_sanctum_sentryAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
+        }
 
         uint32 _savagePounceTimer;
         uint32 _ripFleshTimer;
+        uint32 _dispellTimer;
 
         void EnterCombat(Unit*)
         {
@@ -299,6 +314,7 @@ public:
         {
             _savagePounceTimer = 5000;
             _ripFleshTimer = 0;
+            _dispellTimer = 0;
 
             me->CastSpell(me, SPELL_STRENGTH_OF_THE_PACK, true);
         }
@@ -310,6 +326,7 @@ public:
 
             _savagePounceTimer += diff;
             _ripFleshTimer += diff;
+            _dispellTimer += diff;
 
             if (_savagePounceTimer >= 5000)
             {
@@ -327,7 +344,11 @@ public:
                 me->CastSpell(me->GetVictim(), SPELL_RIP_FLESH, false);
                 _ripFleshTimer = 0;
             }
-
+            else if (_dispellTimer >= 500)
+            {
+                me->RemoveAura(68605);
+                _dispellTimer = 0;
+            }
             DoMeleeAttackIfReady();
         }
     };
@@ -345,11 +366,17 @@ public:
 
     struct npc_auriaya_feral_defenderAI : public ScriptedAI
     {
-        npc_auriaya_feral_defenderAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature) { }
+        npc_auriaya_feral_defenderAI(Creature* pCreature) : ScriptedAI(pCreature), summons(pCreature)
+        {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
+        }
 
         int32 _feralRushTimer;
         int32 _feralPounceTimer;
         uint8 _feralEssenceStack;
+        uint32 _dispellTimer;
         SummonList summons;
 
         void Reset()
@@ -358,6 +385,7 @@ public:
             _feralRushTimer = 3000;
             _feralPounceTimer = 0;
             _feralEssenceStack = 8;
+            _dispellTimer = 0;
 
             if (Aura* aur = me->AddAura(SPELL_FERAL_ESSENCE, me))
                 aur->SetStackAmount(_feralEssenceStack);
@@ -408,6 +436,7 @@ public:
 
             _feralRushTimer += diff;
             _feralPounceTimer += diff;
+            _dispellTimer += diff;
 
             if (_feralRushTimer >= 6000)
             {
@@ -423,7 +452,11 @@ public:
                 me->CastSpell(me->GetVictim(), SPELL_FERAL_POUNCE, false);
                 _feralPounceTimer = 0;
             }
-
+            else if (_dispellTimer >= 500)
+            {
+                me->RemoveAura(68605);
+                _dispellTimer = 0;
+            }
             DoMeleeAttackIfReady();
         }
     };

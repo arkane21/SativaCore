@@ -69,6 +69,7 @@
 enum eEvents
 {
     EVENT_NONE = 0,
+    EVENT_DISPEL = 1,
     EVENT_ACTIVATE_CONSTRUCT,
     EVENT_SPELL_SCORCH,
     EVENT_ENABLE_ROTATE,
@@ -194,7 +195,12 @@ public:
 
     struct boss_ignisAI : public ScriptedAI
     {
-        boss_ignisAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+        boss_ignisAI(Creature* pCreature) : ScriptedAI(pCreature)
+        {
+          me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+          me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+          me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
+        }
 
         EventMap events;
         uint8 counter;
@@ -222,6 +228,7 @@ public:
             me->setActive(true);
 
             std::list<Creature*> icl;
+
             me->GetCreaturesWithEntryInRange(icl, 300.0f, NPC_IRON_CONSTRUCT);
             for( std::list<Creature*>::iterator itr = icl.begin(); itr != icl.end(); ++itr )
             {
@@ -239,6 +246,7 @@ public:
             bShattered = false;
             lastShatterMSTime = 0;
             events.Reset();
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             events.ScheduleEvent(EVENT_ACTIVATE_CONSTRUCT, RAID_MODE(40000, 30000));
             events.ScheduleEvent(EVENT_SPELL_SCORCH, 10000);
             events.ScheduleEvent(EVENT_SPELL_FLAME_JETS, 32000);
@@ -372,6 +380,10 @@ public:
                 case EVENT_ENABLE_ROTATE:
                     me->SetControlled(false, UNIT_STATE_ROOT);
                     me->DisableRotate(false);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
                 case EVENT_SPELL_FLAME_JETS:
                     me->MonsterTextEmote(TEXT_FLAME_JETS, 0, true);

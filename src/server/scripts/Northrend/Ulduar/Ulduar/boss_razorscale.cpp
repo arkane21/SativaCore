@@ -86,6 +86,7 @@ enum eSay
 enum eEvents
 {
     EVENT_NONE = 0,
+    EVENT_DISPEL = 1,
     EVENT_COMMANDER_SAY_AGGRO,
     EVENT_EE_SAY_MOVE_OUT,
     EVENT_ENRAGE,
@@ -124,6 +125,9 @@ public:
         {
             pInstance = me->GetInstanceScript();
             startPath = true;
+            me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
+            me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañosn den demoledor
+            me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
         }
 
         InstanceScript* pInstance;
@@ -167,6 +171,7 @@ public:
             events.Reset();
             events.ScheduleEvent(EVENT_COMMANDER_SAY_AGGRO, 5000);
             events.ScheduleEvent(EVENT_EE_SAY_MOVE_OUT, 10000);
+            events.ScheduleEvent(EVENT_DISPEL, 500);
             events.ScheduleEvent(EVENT_ENRAGE, 600000);
             events.ScheduleEvent(EVENT_SPELL_FIREBALL, 6000);
             events.ScheduleEvent(EVENT_SPELL_DEVOURING_FLAME, 13000);
@@ -520,6 +525,10 @@ public:
                 case EVENT_SPELL_FLAME_BREATH:
                     me->CastSpell(me->GetVictim(), S_FLAMEBREATH, false);
                     events.RepeatEvent(20000);
+                    break;
+                case EVENT_DISPEL:
+                    me->RemoveAura(68605);
+                    events.RepeatEvent(500);
                     break;
                 case EVENT_SPELL_DEVOURING_FLAME_GROUND:
                     me->CastSpell(me->GetVictim(), SPELL_DEVOURINGFLAME, false);
