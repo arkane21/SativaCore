@@ -399,6 +399,7 @@ public:
             me->SummonCreature(NPC_DARK_RUNE_ACOLYTE_G, 2198.29f, -436.92f, 419.985f, 0.261799f);
             me->SummonCreature(NPC_DARK_RUNE_ACOLYTE_G, 2227.58f, -308.303f, 412.134f, 1.59372f);
             me->SummonCreature(NPC_DARK_RUNE_ACOLYTE_G, 2227.47f, -345.375f, 412.134f, 1.56622f);
+            me->SummonCreature(NPC_DARK_RUNE_ACOLYTE_G, 2227.31f, -436.22f, 412.26f, 1.06465f);
 
             // Iron Honor Guard 32875
             me->SummonCreature(NPC_IRON_HONOR_GUARD, 2198.05f, -428.769f, 419.985f, 6.05629f);
