@@ -223,9 +223,10 @@ enum ThorimEvents
     EVENT_SIF_FINISH_DOMINION               = 102,
     EVENT_SIF_FROSTBOLT_VALLEY              = 103,
     EVENT_SIF_BLIZZARD                      = 104,
-    EVENT_SIF_FROST_NOVA_START              = 105,
-    EVENT_SIF_FROST_NOVA_CAST               = 106,
-    EVENT_SIF_REAURA                        = 107,
+    EVENT_SIF_BLIZZARD_2                    = 105,
+    EVENT_SIF_FROST_NOVA_START              = 106,
+    EVENT_SIF_FROST_NOVA_CAST               = 107,
+    EVENT_SIF_REAURA                        = 108,
 
 
     EVENT_DR_WARBRINGER_RS                  = 110,
@@ -841,13 +842,14 @@ public:
 
     struct boss_thorim_sifAI : public ScriptedAI
     {
-        boss_thorim_sifAI(Creature* pCreature) : ScriptedAI(pCreature) { }
+        boss_thorim_sifAI(Creature* pCreature) : ScriptedAI(pCreature), summons(me) { }
 
         void MoveInLineOfSight(Unit*) {}
         void AttackStart(Unit*) {}
 
         bool _allowCast;
         EventMap events;
+        SummonList summons;
 
         void Reset()
         {
@@ -884,6 +886,15 @@ public:
             }
         }
 
+        void JustSummoned(Creature* cr)
+        {
+            if (cr->GetEntry() == NPC_SIF_BLIZZARD)
+            {
+                cr->CastSpell(cr, RAID_MODE(SPELL_BLIZZARD_10, SPELL_BLIZZARD_25), true);
+              }
+            summons.Summon(cr);
+        }
+
         void UpdateAI(uint32 diff)
         {
             events.Update(diff);
@@ -911,6 +922,7 @@ public:
                     events.ScheduleEvent(EVENT_SIF_FROST_NOVA_START, 1000);
                     events.ScheduleEvent(EVENT_SIF_FROSTBOLT_VALLEY, 11000);
                     events.ScheduleEvent(EVENT_SIF_BLIZZARD, 15000);
+                    events.ScheduleEvent(EVENT_SIF_BLIZZARD_2, urand(38000, 45000));
                     events.ScheduleEvent(EVENT_SIF_REAURA, 5000);
                     break;
                 case EVENT_SIF_FROSTBOLT_VALLEY:
@@ -918,8 +930,13 @@ public:
                     events.RepeatEvent(13000);
                     return;
                 case EVENT_SIF_BLIZZARD:
-                    me->SummonCreature(NPC_SIF_BLIZZARD, 2108.7f, -280.04f, 419.42f, 0, TEMPSUMMON_TIMED_DESPAWN, 30000);
-                    events.RepeatEvent(30000);
+                    me->SummonCreature(NPC_SIF_BLIZZARD, 2108.7f, -280.04f, 419.42f, 0, TEMPSUMMON_TIMED_DESPAWN, 240000);
+                    events.RepeatEvent(200000);
+                    return;
+                case EVENT_SIF_BLIZZARD_2:
+                    if (Creature* cr = me->FindNearestCreature(NPC_SIF_BLIZZARD, 100))
+                    cr->CastSpell(cr, RAID_MODE(SPELL_BLIZZARD_10, SPELL_BLIZZARD_25), true);
+                    events.RepeatEvent(urand(27000, 35000));
                     return;
                 case EVENT_SIF_FROST_NOVA_START:
                     me->NearTeleportTo(2108 + urand(0, 42), -238 - irand(0, 46), 420.02f, me->GetAngle(&Middle));
@@ -1062,7 +1079,7 @@ public:
         void AttackStart(Unit* /*who*/) {}
         void InitWaypoint()
         {
-          AddWaypoint(1, 2104.6f, -268.5f, 419.4f, 0);
+          AddWaypoint(1, 2104.6f, -268.5f, 419.4f, 0); //actualmente da 7 vueltas
           AddWaypoint(2, 2104.3f, -256.3f, 419.4f, 0);
           AddWaypoint(3, 2109.3f, -246.4f, 419.4f, 0);
           AddWaypoint(4, 2117.9f, -238.6f, 419.4f, 0);
@@ -1074,12 +1091,84 @@ public:
           AddWaypoint(10, 2143.5f, -286.0f, 419.4f, 0);
           AddWaypoint(11, 2128.5f, -286.0f, 419.4f, 0);
           AddWaypoint(12, 2117.5f, -289.0f, 419.4f, 0);
+          AddWaypoint(13, 2104.6f, -268.5f, 419.4f, 0);  //1
+          AddWaypoint(14, 2104.3f, -256.3f, 419.4f, 0);  //2
+          AddWaypoint(15, 2109.3f, -246.4f, 419.4f, 0);  //3
+          AddWaypoint(16, 2117.9f, -238.6f, 419.4f, 0);  //4
+          AddWaypoint(17, 2128.8f, -232.1f, 419.4f, 0);  //5
+          AddWaypoint(18, 2151.9f, -237.5f, 419.4f, 0);  //6
+          AddWaypoint(19, 2164.9f, -256.3f, 419.4f, 0);  //7
+          AddWaypoint(20, 2161.5f, -280.0f, 419.4f, 0);  //8
+          AddWaypoint(21, 2155.5f, -291.0f, 419.4f, 0);   //9
+          AddWaypoint(22, 2143.5f, -286.0f, 419.4f, 0);  //10
+          AddWaypoint(23, 2128.5f, -286.0f, 419.4f, 0);  //11
+          AddWaypoint(24, 2117.5f, -289.0f, 419.4f, 0);  //12
+          AddWaypoint(25, 2104.6f, -268.5f, 419.4f, 0);  //1
+          AddWaypoint(26, 2104.3f, -256.3f, 419.4f, 0);  //2
+          AddWaypoint(27, 2109.3f, -246.4f, 419.4f, 0);  //3
+          AddWaypoint(28, 2117.9f, -238.6f, 419.4f, 0);  //4
+          AddWaypoint(29, 2128.8f, -232.1f, 419.4f, 0);  //5
+          AddWaypoint(30, 2151.9f, -237.5f, 419.4f, 0);  //6
+          AddWaypoint(31, 2164.9f, -256.3f, 419.4f, 0);  //7
+          AddWaypoint(32, 2161.5f, -280.0f, 419.4f, 0);  //8
+          AddWaypoint(33, 2155.5f, -291.0f, 419.4f, 0);   //9
+          AddWaypoint(34, 2143.5f, -286.0f, 419.4f, 0);  //10
+          AddWaypoint(35, 2128.5f, -286.0f, 419.4f, 0);  //11
+          AddWaypoint(36, 2117.5f, -289.0f, 419.4f, 0);  //12
+          AddWaypoint(37, 2104.6f, -268.5f, 419.4f, 0);  //1
+          AddWaypoint(38, 2104.3f, -256.3f, 419.4f, 0);  //2
+          AddWaypoint(39, 2109.3f, -246.4f, 419.4f, 0);  //3
+          AddWaypoint(40, 2117.9f, -238.6f, 419.4f, 0);  //4
+          AddWaypoint(41, 2128.8f, -232.1f, 419.4f, 0);  //5
+          AddWaypoint(42, 2151.9f, -237.5f, 419.4f, 0);  //6
+          AddWaypoint(43, 2164.9f, -256.3f, 419.4f, 0);  //7
+          AddWaypoint(44, 2161.5f, -280.0f, 419.4f, 0);  //8
+          AddWaypoint(45, 2155.5f, -291.0f, 419.4f, 0);   //9
+          AddWaypoint(46, 2143.5f, -286.0f, 419.4f, 0);  //10
+          AddWaypoint(47, 2128.5f, -286.0f, 419.4f, 0);  //11
+          AddWaypoint(48, 2117.5f, -289.0f, 419.4f, 0);  //12
+          AddWaypoint(49, 2104.6f, -268.5f, 419.4f, 0);  //1
+          AddWaypoint(50, 2104.3f, -256.3f, 419.4f, 0);  //2
+          AddWaypoint(51, 2109.3f, -246.4f, 419.4f, 0);  //3
+          AddWaypoint(52, 2117.9f, -238.6f, 419.4f, 0);  //4
+          AddWaypoint(53, 2128.8f, -232.1f, 419.4f, 0);  //5
+          AddWaypoint(54, 2151.9f, -237.5f, 419.4f, 0);  //6
+          AddWaypoint(55, 2164.9f, -256.3f, 419.4f, 0);  //7
+          AddWaypoint(56, 2161.5f, -280.0f, 419.4f, 0);  //8
+          AddWaypoint(57, 2155.5f, -291.0f, 419.4f, 0);   //9
+          AddWaypoint(58, 2143.5f, -286.0f, 419.4f, 0);  //10
+          AddWaypoint(59, 2128.5f, -286.0f, 419.4f, 0);  //11
+          AddWaypoint(60, 2117.5f, -289.0f, 419.4f, 0);  //12
+          AddWaypoint(61, 2104.6f, -268.5f, 419.4f, 0);  //1
+          AddWaypoint(62, 2104.3f, -256.3f, 419.4f, 0);  //2
+          AddWaypoint(63, 2109.3f, -246.4f, 419.4f, 0);  //3
+          AddWaypoint(64, 2117.9f, -238.6f, 419.4f, 0);  //4
+          AddWaypoint(65, 2128.8f, -232.1f, 419.4f, 0);  //5
+          AddWaypoint(66, 2151.9f, -237.5f, 419.4f, 0);  //6
+          AddWaypoint(67, 2164.9f, -256.3f, 419.4f, 0);  //7
+          AddWaypoint(68, 2161.5f, -280.0f, 419.4f, 0);  //8
+          AddWaypoint(69, 2155.5f, -291.0f, 419.4f, 0);   //9
+          AddWaypoint(70, 2143.5f, -286.0f, 419.4f, 0);  //10
+          AddWaypoint(71, 2128.5f, -286.0f, 419.4f, 0);  //11
+          AddWaypoint(72, 2117.5f, -289.0f, 419.4f, 0);  //12
+          AddWaypoint(73, 2104.6f, -268.5f, 419.4f, 0);  //1
+          AddWaypoint(74, 2104.3f, -256.3f, 419.4f, 0);  //2
+          AddWaypoint(75, 2109.3f, -246.4f, 419.4f, 0);  //3
+          AddWaypoint(76, 2117.9f, -238.6f, 419.4f, 0);  //4
+          AddWaypoint(77, 2128.8f, -232.1f, 419.4f, 0);  //5
+          AddWaypoint(78, 2151.9f, -237.5f, 419.4f, 0);  //6
+          AddWaypoint(79, 2164.9f, -256.3f, 419.4f, 0);  //7
+          AddWaypoint(80, 2161.5f, -280.0f, 419.4f, 0);  //8
+          AddWaypoint(81, 2155.5f, -291.0f, 419.4f, 0);   //9
+          AddWaypoint(82, 2143.5f, -286.0f, 419.4f, 0);  //10
+          AddWaypoint(83, 2128.5f, -286.0f, 419.4f, 0);  //11
+          AddWaypoint(84, 2117.5f, -289.0f, 419.4f, 0);  //12
+
         }
         void Reset()
         {
-            me->SetSpeed(MOVE_RUN, 1.3);
+            me->SetSpeed(MOVE_RUN, 0.8);
             me->SetSpeed(MOVE_WALK, 1);
-            me->CastSpell(me, RAID_MODE(SPELL_BLIZZARD_10, SPELL_BLIZZARD_25), true);
         }
 
         void WaypointReached(uint32  /*point*/)
