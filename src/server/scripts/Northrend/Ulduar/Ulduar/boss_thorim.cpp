@@ -405,6 +405,7 @@ public:
             // Iron Honor Guard 32875
             me->SummonCreature(NPC_IRON_HONOR_GUARD, 2198.05f, -428.769f, 419.985f, 6.05629f);
             me->SummonCreature(NPC_IRON_HONOR_GUARD, 2220.31f, -436.22f, 412.26f, 1.06465f);
+            me->SummonCreature(NPC_IRON_HONOR_GUARD, 2095.70f, -440.80f, 438.90f, 6.05629f);
 
             // Runic Colossus 32872
             me->SummonCreature(NPC_RUNIC_COLOSSUS, 2227.5f, -396.179f, 412.176f, 1.79769f);
@@ -997,12 +998,20 @@ public:
         {
             AddWaypoint(1, 2135, -304, 438.24f, 0);
             AddWaypoint(2, 2132, -441, 438.24f, 0);
-            AddWaypoint(3, 2167, -442, 438.24f, 0);
-            AddWaypoint(4, 2227, -432, 412.18f, 0);
-            AddWaypoint(5, 2227, -263, 412.17f, 0);
-            AddWaypoint(6, 2179, -262, 414.7f, 0);
-            AddWaypoint(7, 2169, -261, 419.3f, 0);
-            AddWaypoint(8, 2110, -251, 419.42f, 0);
+            AddWaypoint(3, 2097, -441, 438.24f, 0);
+            AddWaypoint(4, 2167, -442, 438.24f, 0);
+            AddWaypoint(5, 2227, -432, 412.18f, 0);
+            AddWaypoint(6, 2227, -263, 412.17f, 0);
+            AddWaypoint(7, 2179, -262, 414.7f, 0);
+            AddWaypoint(8, 2169, -261, 419.3f, 0);
+            AddWaypoint(9, 2110, -251, 419.42f, 0);
+            AddWaypoint(10, 2169, -261, 419.3f, 0); // 8
+            AddWaypoint(11, 2179, -262, 414.7f, 0); // 7
+            AddWaypoint(12, 2227, -263, 412.17f, 0); // 6
+            AddWaypoint(13, 2227, -432, 412.18f, 0); // 5
+            AddWaypoint(14, 2167, -442, 438.24f, 0); // 4
+            AddWaypoint(15, 2097, -441, 438.24f, 0); // 3
+
         }
 
         void Reset()
@@ -1167,7 +1176,7 @@ public:
         }
         void Reset()
         {
-            me->SetSpeed(MOVE_RUN, 0.8);
+            me->SetSpeed(MOVE_RUN, 0.6);
             me->SetSpeed(MOVE_WALK, 1);
         }
 
