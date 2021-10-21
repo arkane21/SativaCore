@@ -848,7 +848,7 @@ public:
         uint32 _attackTimer;
         void Reset()
         {
-            if (Unit* target = SelectTargetFromPlayerList(200))
+            if (Unit* target = me->SelectNearestPlayer(50.0f))
                 AttackStart(target);
             else
                 me->DespawnOrUnsummon();
