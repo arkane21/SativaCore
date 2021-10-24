@@ -364,7 +364,7 @@ public:
                 case EVENT_SUMMON_MOLE_MACHINES:
                     {
                         memset(cords, '\0', sizeof(cords));
-                        uint8 num = RAID_MODE( urand(2, 3), urand(2, 4) );
+                        uint8 num = RAID_MODE( urand(1, 2), urand(2, 3) );
                         for( int i = 0; i < num; ++i )
                         {
                             // X: (550, 625) Y: (-185, -230)
