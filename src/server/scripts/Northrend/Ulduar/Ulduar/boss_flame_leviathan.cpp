@@ -747,9 +747,9 @@ public:
             who->ApplySpellImmune(63847, IMMUNITY_ID, 63847, apply); // SPELL_FLAME_VENTS_TRIGGER
             who->ApplySpellImmune(SPELL_MISSILE_BARRAGE, IMMUNITY_ID, SPELL_MISSILE_BARRAGE, apply);
             who->ApplySpellImmune(SPELL_BATTERING_RAM, IMMUNITY_ID, SPELL_BATTERING_RAM, apply);
-            who->ApplySpellImmune(62912, INMUNITI_ID, 62912, apply); //con esto el martillo de thorim no debe afectar a los player en desconeccion
-            who->ApplySpellImmune(62297 INMUNITI_ID, 62297, apply); //Con esto la furia de hodir no debe afectar a los player en desconeccion
-            who->ApplySpellImmune(62910, INMUNITI_ID, 62910, apply); //con esto el infierno de mimiron no afectara los player en desconeccion
+            who->ApplySpellImmune(62912, IMMUNITY_ID, 62912, apply); //con esto el martillo de thorim no debe afectar a los player en desconeccion
+            who->ApplySpellImmune(62297, IMMUNITY_ID, 62297, apply); //Con esto la furia de hodir no debe afectar a los player en desconeccion
+            who->ApplySpellImmune(62910, IMMUNITY_ID, 62910, apply); //con esto el infierno de mimiron no afectara los player en desconeccion
 
             if (seatId == SEAT_PLAYER)
             {
