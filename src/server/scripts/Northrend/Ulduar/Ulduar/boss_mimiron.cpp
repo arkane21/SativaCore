@@ -169,6 +169,7 @@ enum EVENTS
     EVENT_SPELL_NAPALM_SHELL                        = 3,
     EVENT_SPELL_PLASMA_BLAST                        = 4,
     EVENT_SPELL_SHOCK_BLAST                         = 5,
+    EVENT_SPELL_SHOCK_BLAST_2                       = 73,
     EVENT_PROXIMITY_MINES_1                         = 6,
 
     // VX001:
@@ -178,6 +179,7 @@ enum EVENTS
     EVENT_SPELL_RAPID_BURST                         = 18,
     EVENT_SPELL_RAPID_BURST_INTERVAL                = 19,
     EVENT_SPELL_SPINNING_UP                         = 20,
+    EVENT_SPELL_SPINNING_UP_2                       = 72,
     EVENT_HAND_PULSE                                = 37,
 
     // ACU:
@@ -1068,7 +1070,7 @@ public:
                             AttackStart(target);
                         DoZoneInCombat();
                         events.Reset();
-                        events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST, 20000);
+                        events.ScheduleEvent(EVENT_SPELL_SHOCK_BLAST_2, 35000);
                         events.ScheduleEvent(EVENT_DISPEL, 50);
                         events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 6000);
                         break;
@@ -1178,6 +1180,11 @@ public:
                 case EVENT_SPELL_SHOCK_BLAST:
                     me->CastSpell(me->GetVictim(), SPELL_SHOCK_BLAST, false);
                     events.RepeatEvent(30000);
+                    events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 8000);
+                    break;
+                case EVENT_SPELL_SHOCK_BLAST_2:
+                    me->CastSpell(me->GetVictim(), SPELL_SHOCK_BLAST, false);
+                    events.RepeatEvent(35000);
                     events.ScheduleEvent(EVENT_PROXIMITY_MINES_1, 8000);
                     break;
                 case EVENT_PROXIMITY_MINES_1:
@@ -1366,7 +1373,7 @@ public:
                         events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
                         events.ScheduleEvent(EVENT_HAND_PULSE, 0);
                         events.ScheduleEvent(EVENT_DISPEL, 50);
-                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP, 30000);
+                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP_2, 39500);
                         if (Creature* c = GetMimiron())
                             if (c->AI()->GetData(1))
                                 events.ScheduleEvent(EVENT_FROST_BOMB, 1000);
@@ -1514,7 +1521,7 @@ public:
                     events.RepeatEvent(50);
                     break;
                 case EVENT_HAND_PULSE:
-                    if (Player* p = SelectTargetFromPlayerList(40.0f))
+                    if (Player* p = SelectTargetFromPlayerList(100.0f))
                     {
                         me->SetFacingToObject(p);
                         if (Unit* vb = me->GetVehicleBase())
@@ -1539,8 +1546,7 @@ public:
                     events.RepeatEvent(1750);
                     break;
                 case EVENT_SPELL_SPINNING_UP:
-                    events.RepeatEvent(45000);
-                    if (Player* p = SelectTargetFromPlayerList(40.0f))
+                    if (Player* p = SelectTargetFromPlayerList(100.0f))
                     {
                         float angle = me->GetAngle(p);
 
@@ -1548,7 +1554,7 @@ public:
                         {
                             vehicle->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
                             vehicle->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_01);
-                        //  angle -= vehicle->GetOrientation();  -- Falta fixear los brazos
+                            angle -= vehicle->GetOrientation();
                         }
 
                         spinningUpOrientation = (uint32)((angle * 100.0f) / (2 * M_PI));
@@ -1557,7 +1563,28 @@ public:
                         me->CastSpell(p, SPELL_SPINNING_UP, false);
                         events.RescheduleEvent((Phase == 2 ? EVENT_SPELL_RAPID_BURST : EVENT_HAND_PULSE), 14500);
                     }
+                    events.RepeatEvent(45000);
                     break;
+                    case EVENT_SPELL_SPINNING_UP_2:
+                        if (Player* p = SelectTargetFromPlayerList(100.0f))
+                        {
+                            float angle = me->GetAngle(p);
+
+                            if (Unit* vehicle = me->GetVehicleBase())
+                            {
+                                vehicle->SetUInt32Value(UNIT_NPC_EMOTESTATE, EMOTE_STATE_CUSTOM_SPELL_01);
+                                vehicle->HandleEmoteCommand(EMOTE_STATE_CUSTOM_SPELL_01);
+                                angle -= vehicle->GetOrientation();
+                            }
+
+                            spinningUpOrientation = (uint32)((angle * 100.0f) / (2 * M_PI));
+                            spinningUpTimer = 1500;
+                            me->SetFacingTo(angle);
+                            me->CastSpell(p, SPELL_SPINNING_UP, false);
+                            events.RescheduleEvent((Phase == 2 ? EVENT_SPELL_RAPID_BURST : EVENT_HAND_PULSE), 14500);
+                        }
+                        events.RepeatEvent(35000);
+                        break;
                 case EVENT_FLAME_SUPPRESSION_10:
                     me->CastSpell(me, SPELL_FLAME_SUPPRESSANT_10yd, false);
                     events.RepeatEvent(10000);
