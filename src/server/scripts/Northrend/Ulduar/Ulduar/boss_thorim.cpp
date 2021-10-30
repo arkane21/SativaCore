@@ -243,6 +243,7 @@ enum ThorimEvents
     EVENT_DR_COMMONER_LB                    = 141,
 
     EVENT_DISPEL                            = 142,
+    EVENT_DISPEL_2                          = 143,
 };
 
 const Position ArenaNPCs[] =
@@ -724,6 +725,7 @@ public:
                     me->CastCustomSpell(SPELL_CHARGE_ORB, SPELLVALUE_MAX_TARGETS, 1, me, false);
                     events.RepeatEvent(16000);
                     PlaySpecial();
+                    events.ScheduleEvent(EVENT_DISPEL_2, 50);
                     break;
                 case EVENT_THORIM_LIGHTNING_ORB:
                     {
@@ -769,6 +771,10 @@ public:
                 case EVENT_DISPEL:
                     me->RemoveAura(68605);
                     events.RepeatEvent(500);
+                    break;
+                case EVENT_DISPEL_2:
+                    me->RemoveAura(62279);
+                    DoResetThreat();
                     break;
                 case EVENT_THORIM_BERSERK:
                     me->CastSpell(me, SPELL_BERSERK, true);
