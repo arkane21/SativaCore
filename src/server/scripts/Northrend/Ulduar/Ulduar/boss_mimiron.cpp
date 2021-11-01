@@ -1373,7 +1373,7 @@ public:
                         events.ScheduleEvent(EVENT_SPELL_ROCKET_STRIKE, 16000);
                         events.ScheduleEvent(EVENT_HAND_PULSE, 0);
                         events.ScheduleEvent(EVENT_DISPEL, 50);
-                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP_2, 39500);
+                        events.ScheduleEvent(EVENT_SPELL_SPINNING_UP_2, 40200);
                         if (Creature* c = GetMimiron())
                             if (c->AI()->GetData(1))
                                 events.ScheduleEvent(EVENT_FROST_BOMB, 1000);
