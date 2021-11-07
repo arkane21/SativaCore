@@ -243,26 +243,30 @@ enum SOUNDS
 #define SPELL_HAND_PULSE_L                          RAID_MODE(SPELL_HAND_PULSE_10_L, SPELL_HAND_PULSE_25_L)
 #define SPELL_FROST_BOMB_EXPLOSION                  RAID_MODE(SPELL_FROST_BOMB_EXPLOSION_10, SPELL_FROST_BOMB_EXPLOSION_25)
 
+enum MimironTalks
+{
 
-#define TEXT_AGGRO                                  "Oh, my! I wasn't expecting company! The workshop is such a mess! How embarrassing!"
-#define TEXT_BERSERK                                "Oh, my! It would seem that we are out of time, my friends!"
-#define TEXT_HARDMODE                               "Now why would you go and do something like that? Didn't you see the sign that said 'DO NOT PUSH THIS BUTTON!'? How will we finish testing with the self-destruct mechanism active?"
-#define TEXT_LMK2_ACTIVATE                          "We haven't much time, friends! You're going to help me test out my latest and greatest creation. Now, before you change your minds, remember, that you kind of owe it to me after the mess you made with the XT-002."
-#define TEXT_LMK2_SLAIN_1                           "MEDIC!"
-#define TEXT_LMK2_SLAIN_2                           "I can fix that... or, maybe not! Sheesh, what a mess..."
-#define TEXT_LMK2_DEATH                             "WONDERFUL! Positively marvelous results! Hull integrity at 98.9 percent! Barely a dent! Moving right along."
-#define TEXT_VX001_ACTIVATE                         "Behold the VX-001 Anti-personnel Assault Cannon! You might want to take cover."
-#define TEXT_VX001_SLAIN_1                          "Fascinating. I think they call that a \"clean kill\"."
-#define TEXT_VX001_SLAIN_2                          "Note to self: Cannon highly effective against flesh."
-#define TEXT_VX001_DEATH                            "Thank you, friends! Your efforts have yielded some fantastic data! Now, where did I put-- oh, there it is!"
-#define TEXT_ACU_ACTIVATE                           "Isn't it beautiful? I call it the magnificent aerial command unit!"
-#define TEXT_ACU_SLAIN_1                            "Outplayed!"
-#define TEXT_ACU_SLAIN_2                            "You can do better than that!"
-#define TEXT_ACU_DEATH                              "Preliminary testing phase complete. Now comes the true test!!"
-#define TEXT_VOLTRON_ACTIVATE                       "Gaze upon its magnificence! Bask in its glorious, um, glory! I present you... V-07-TR-0N!"
-#define TEXT_VOLTRON_SLAIN_1                        "Prognosis: Negative!"
-#define TEXT_VOLTRON_SLAIN_2                        "You're not going to get up from that one, friend."
-#define TEXT_VOLTRON_DEATH                          "It would appear that I've made a slight miscalculation. I allowed my mind to be corrupted by the fiend in the prison, overriding my primary directive. All systems seem to be functional now. Clear."
+    TEXT_AGGRO  = 0,
+    TEXT_HARDMODE = 1,
+    TEXT_LMK2_ACTIVATE = 2,
+    TEXT_LMK2_SLAIN_1 = 3,
+    TEXT_LMK2_SLAIN_2 = 3,
+    TEXT_LMK2_DEATH   = 4,
+    TEXT_VX001_ACTIVATE = 5,
+    TEXT_VX001_SLAIN_1 = 6,
+    TEXT_VX001_SLAIN_2 = 6,
+    TEXT_VX001_DEATH = 7,
+    TEXT_ACU_ACTIVATE = 8,
+    TEXT_ACU_SLAIN_1 = 9,
+    TEXT_ACU_SLAIN_2 = 9,
+    TEXT_ACU_DEATH = 10,
+    TEXT_VOLTRON_ACTIVATE = 11,
+    TEXT_VOLTRON_SLAIN_1 = 12,
+    TEXT_VOLTRON_SLAIN_2 = 12,
+    TEXT_VOLTRON_DEATH = 13,
+    TEXT_OUT_TIME = 14,
+
+};
 
 enum ComputerTalks
 {
@@ -280,6 +284,8 @@ enum ComputerTalks
     TALK_COMPUTER_ONE = 11,
     TALK_COMPUTER_ZERO = 12,
 };
+
+
 
 
 
@@ -383,8 +389,7 @@ public:
 
             if (!hardmode)
             {
-                me->MonsterYell(TEXT_LMK2_ACTIVATE, LANG_UNIVERSAL, 0);
-                me->PlayDirectSound(SOUND_TANK_ACTIVE);
+                me->AI()->Talk(TEXT_LMK2_ACTIVATE);
                 events.ScheduleEvent(EVENT_SIT_LMK2, 6000);
                 events.ScheduleEvent(EVENT_BERSERK, 900000);
             }
@@ -441,16 +446,15 @@ public:
                 case 0:
                     break;
                 case EVENT_COMPUTER_SAY_INITIATED:
-                    if( Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000) )
+                    if( Creature* computer = me->SummonCreature(NPC_COMPUTER, 2746.7f, 2569.44f, 410.39f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000) )
                         computer->AI()->Talk(TALK_COMPUTER_INITIATED);
                     break;
                 case EVENT_COMPUTER_SAY_MINUTES:
-                    if( Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000) )
+                    if( Creature* computer = me->SummonCreature(NPC_COMPUTER, 2746.7f, 2569.44f, 410.39f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000) )
                         computer->AI()->Talk(minutesTalkNum++);
                     break;
                 case EVENT_MIMIRON_SAY_HARDMODE:
-                    me->MonsterYell(TEXT_HARDMODE, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_TANK_HARD_INTRO);
+                    me->AI()->Talk(TEXT_HARDMODE);
                     events.ScheduleEvent(EVENT_SPAWN_FLAMES_INITIAL, 0);
                     events.ScheduleEvent(EVENT_SIT_LMK2, 4000);
                     break;
@@ -484,8 +488,7 @@ public:
                     break;
                 case EVENT_BERSERK:
                     berserk = true;
-                    me->MonsterYell(TEXT_BERSERK, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_BERSERK);
+                    me->AI()->Talk(TEXT_OUT_TIME);
                     if( hardmode )
                         me->SummonCreature(33576, 2744.78f, 2569.47f, 364.32f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 120000);
                     events.ScheduleEvent(EVENT_BERSERK_2, 0);
@@ -532,8 +535,7 @@ public:
                     if (Creature* LMK2 = GetLMK2())
                     {
                         me->EnterVehicle(LMK2, 1);
-                        me->MonsterYell(TEXT_LMK2_DEATH, LANG_UNIVERSAL, 0);
-                        me->PlayDirectSound(SOUND_TANK_DEATH);
+                        me->AI()->Talk(TEXT_LMK2_DEATH);
                         LMK2->SetFacingTo(3.58f);
                         events.ScheduleEvent(EVENT_ELEVATOR_INTERVAL_0, 6000);
                         break;
@@ -573,8 +575,7 @@ public:
                     EnterEvadeMode();
                     break;
                 case EVENT_SITTING_ON_VX001:
-                    me->MonsterYell(TEXT_VX001_ACTIVATE, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_TORSO_ACTIVE);
+                    me->AI()->Talk(TEXT_VX001_ACTIVATE);
                     events.ScheduleEvent(EVENT_ENTER_VX001, 5000);
                     break;
                 case EVENT_ENTER_VX001:
@@ -631,8 +632,7 @@ public:
                     break;
                 case EVENT_SAY_VX001_DEAD:
                     changeAllowedFlameSpreadTime = true;
-                    me->MonsterYell(TEXT_VX001_DEATH, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_TORSO_DEATH);
+                    me->AI()->Talk(TEXT_VX001_DEATH);
                     events.ScheduleEvent(EVENT_ENTER_ACU, 7000);
                     break;
                 case EVENT_ENTER_ACU:
@@ -645,8 +645,7 @@ public:
                     EnterEvadeMode();
                     break;
                 case EVENT_SAY_ACU_ACTIVATE:
-                    me->MonsterYell(TEXT_ACU_ACTIVATE, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_HEAD_ACTIVE);
+                    me->AI()->Talk(TEXT_ACU_ACTIVATE);
                     events.ScheduleEvent(EVENT_ACU_START_ATTACK, 4000);
                     break;
                 case EVENT_ACU_START_ATTACK:
@@ -661,8 +660,7 @@ public:
                     EnterEvadeMode();
                     break;
                 case EVENT_SAY_ACU_DEAD:
-                    me->MonsterYell(TEXT_ACU_DEATH, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_HEAD_DEATH);
+                    me->AI()->Talk(TEXT_ACU_DEATH);
                     events.ScheduleEvent(EVENT_LEVIATHAN_COME_CLOSER, 5000);
                     break;
                 case EVENT_LEVIATHAN_COME_CLOSER:
@@ -720,8 +718,7 @@ public:
                         ACU->SetDisableGravity(false);
                         ACU->EnterVehicle(VX001, 3);
                         me->EnterVehicle(VX001, 1);
-                        me->MonsterYell(TEXT_VOLTRON_ACTIVATE, LANG_UNIVERSAL, 0);
-                        me->PlayDirectSound(SOUND_VOLTRON_ACTIVE);
+                        me->AI()->Talk(TEXT_VOLTRON_ACTIVATE);
                         events.ScheduleEvent(EVENT_START_PHASE4, 10000);
                     }
                     break;
@@ -807,7 +804,7 @@ public:
                             pInstance->DoUpdateAchievementCriteria(ACHIEVEMENT_CRITERIA_TYPE_KILL_CREATURE, NPC_LEVIATHAN_MKII, 1, me);
 
                         if (hardmode)
-                            if( Creature* computer = me->SummonCreature(NPC_COMPUTER, 2790.0f, 2569.44f, 364.31f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000) )
+                            if( Creature* computer = me->SummonCreature(NPC_COMPUTER, 2746.7f, 2569.44f, 410.39f, 0.0f, TEMPSUMMON_TIMED_DESPAWN, 1000) )
                                 computer->AI()->Talk(TALK_COMPUTER_TERMINATED);
 
                         events.Reset();
@@ -815,8 +812,7 @@ public:
                     }
                     break;
                 case EVENT_SAY_VOLTRON_DEAD:
-                    me->MonsterYell(TEXT_VOLTRON_DEATH, LANG_UNIVERSAL, 0);
-                    me->PlayDirectSound(SOUND_VOLTRON_DEATH);
+                    me->AI()->Talk(TEXT_VOLTRON_DEATH);
                     // spawn chest
                     if( uint32 chestId = (hardmode ? RAID_MODE(GO_MIMIRON_CHEST_HARD, GO_MIMIRON_CHEST_HERO_HARD) : RAID_MODE(GO_MIMIRON_CHEST, GO_MIMIRON_CHEST_HERO)) )
                         if( GameObject* go = me->SummonGameObject(chestId, 2744.65f, 2569.46f, 364.397f, 0, 0, 0, 0, 0, 0) )
@@ -1014,6 +1010,11 @@ public:
             me->ApplySpellImmune(62489, IMMUNITY_ID, 62489, true); //daño inicial de la pirita
             me->ApplySpellImmune(62307, IMMUNITY_ID, 62307, true); //daño del cañon del demoledor
             me->ApplySpellImmune(62357, IMMUNITY_ID, 62357, true); //daño del cañon del asedio
+            me->ApplySpellImmune(1714, IMMUNITY_ID, 1714, true);   // Maldicion de las lenguas (rango 1)
+            me->ApplySpellImmune(11719, IMMUNITY_ID, 11719, true); // Maldicion de las lenguas (rango 2)
+            me->ApplySpellImmune(5760, IMMUNITY_ID, 5760, true);   // Veneno de aturdimiento mental
+            me->ApplySpellImmune(31589, IMMUNITY_ID, 31589, true); // Ralentizar (Mago)
+            me->ApplySpellImmune(58604, IMMUNITY_ID, 58604, true); // Aliento de lava
         }
 
         InstanceScript* pInstance;
@@ -1221,26 +1222,22 @@ public:
                     {
                         if( rand() % 2 )
                         {
-                            c->MonsterYell(TEXT_LMK2_SLAIN_1, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_TANK_SLAY_1);
+                            c->AI()->Talk(TEXT_LMK2_SLAIN_1);
                         }
                         else
                         {
-                            c->MonsterYell(TEXT_LMK2_SLAIN_2, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_TANK_SLAY_2);
+                            c->AI()->Talk(TEXT_LMK2_SLAIN_2);
                         }
                     }
                     else
                     {
                         if( rand() % 2 )
                         {
-                            c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
+                            c->AI()->Talk(TEXT_VOLTRON_SLAIN_1);
                         }
                         else
                         {
-                            c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
+                            c->AI()->Talk(TEXT_VOLTRON_SLAIN_2);
                         }
                     }
                 }
@@ -1607,26 +1604,22 @@ public:
                     {
                         if( rand() % 2 )
                         {
-                            c->MonsterYell(TEXT_VX001_SLAIN_1, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_TORSO_SLAY_1);
+                            c->AI()->Talk(TEXT_VX001_SLAIN_1);
                         }
                         else
                         {
-                            c->MonsterYell(TEXT_VX001_SLAIN_2, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_TORSO_SLAY_2);
+                            c->AI()->Talk(TEXT_VX001_SLAIN_2);
                         }
                     }
                     else
                     {
                         if( rand() % 2 )
                         {
-                            c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
+                            c->AI()->Talk(TEXT_VOLTRON_SLAIN_1);
                         }
                         else
                         {
-                            c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
+                            c->AI()->Talk(TEXT_VOLTRON_SLAIN_2);
                         }
                     }
                 }
@@ -1936,26 +1929,22 @@ public:
                     {
                         if( rand() % 2 )
                         {
-                            c->MonsterYell(TEXT_ACU_SLAIN_1, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_HEAD_SLAY_1);
+                            c->AI()->Talk(TEXT_ACU_SLAIN_1);
                         }
                         else
                         {
-                            c->MonsterYell(TEXT_ACU_SLAIN_2, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_HEAD_SLAY_2);
+                            c->AI()->Talk(TEXT_ACU_SLAIN_2);
                         }
                     }
                     else
                     {
                         if( rand() % 2 )
                         {
-                            c->MonsterYell(TEXT_VOLTRON_SLAIN_1, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_1);
+                            c->AI()->Talk(TEXT_VOLTRON_SLAIN_1);
                         }
                         else
                         {
-                            c->MonsterYell(TEXT_VOLTRON_SLAIN_2, LANG_UNIVERSAL, 0);
-                            c->PlayDirectSound(SOUND_VOLTRON_SLAY_2);
+                            c->AI()->Talk(TEXT_VOLTRON_SLAIN_2);
                         }
                     }
                 }
