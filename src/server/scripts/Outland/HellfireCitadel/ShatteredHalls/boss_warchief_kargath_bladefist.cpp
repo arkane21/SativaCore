@@ -18,6 +18,10 @@ enum Spells
     SPELL_BLADE_DANCE              = 30739,
     SPELL_CHARGE                   = 25821,
     SPELL_SPRINT                   = 32720,
+    SPELL_HEALING                  = 61965,
+    SPELL_SPRAY                    = 40079,
+    SPELL_RAIN_OF_FIRE             = 42023,
+    SPELL_FRENZY                   = 53361,
 };
 
 enum Creatures
@@ -40,7 +44,11 @@ enum Misc
     EVENT_SPELL_CHARGE              = 4,
     EVENT_MOVE_TO_NEXT_POINT        = 5,
     EVENT_BLADE_DANCE               = 6,
-    EVENT_FINISH_BLADE_DANCE        = 7
+    EVENT_FINISH_BLADE_DANCE        = 7,
+    EVENT_HEALING                   = 8,
+    EVENT_SPELL_SPRAY               = 9,
+    EVENT_RAIN                      = 10,
+    EVENT_FRENZY                    = 11,
 };
 
 class boss_warchief_kargath_bladefist : public CreatureScript
@@ -75,11 +83,15 @@ public:
             Talk(SAY_AGGRO);
             _EnterCombat();
 
+            events.ScheduleEvent(EVENT_HEALING, 0);
             events.ScheduleEvent(EVENT_CHECK_ROOM, 5000);
             events.ScheduleEvent(EVENT_SUMMON_ADDS, 30000);
             events.ScheduleEvent(EVENT_SUMMON_ASSASSINS, 5000);
+            events.ScheduleEvent(EVENT_SPELL_SPRAY, 29999);
             events.ScheduleEvent(EVENT_BLADE_DANCE, 30000);
+            events.ScheduleEvent(EVENT_FRENZY, 10000);
             events.ScheduleEvent(EVENT_SPELL_CHARGE, 0);
+            events.ScheduleEvent(EVENT_RAIN, 4000);
         }
 
         void JustSummoned(Creature* summon)
@@ -131,11 +143,13 @@ public:
                     for (uint8 i = 0; i < 2; ++i)
                         me->SummonCreature(NPC_HEARTHEN_GUARD + urand(0, 2), AddsEntrance[0], AddsEntrance[1], AddsEntrance[2], 0, TEMPSUMMON_TIMED_DESPAWN_OUT_OF_COMBAT, 30000);
 
-                    events.ScheduleEvent(EVENT_SUMMON_ADDS, 30000);
+                    events.ScheduleEvent(EVENT_SUMMON_ADDS, 20000);
                     break;
                 case EVENT_BLADE_DANCE:
                     events.DelayEvents(10001);
+                    events.ScheduleEvent(EVENT_SPELL_SPRAY, 39999);
                     events.ScheduleEvent(EVENT_BLADE_DANCE, 40000);
+                    events.ScheduleEvent(EVENT_FRENZY, 18000);
                     events.ScheduleEvent(EVENT_MOVE_TO_NEXT_POINT, 0);
                     events.ScheduleEvent(EVENT_FINISH_BLADE_DANCE, 10000);
                     events.SetPhase(1);
@@ -153,11 +167,35 @@ public:
                     me->GetMotionMaster()->Clear();
                     me->GetMotionMaster()->MoveChase(me->GetVictim());
                     if (IsHeroic())
-                        events.ScheduleEvent(EVENT_SPELL_CHARGE, 3000);
+                        events.ScheduleEvent(EVENT_SPELL_CHARGE, 500);
                     break;
                 case EVENT_SPELL_CHARGE:
                     me->CastSpell(me->GetVictim(), SPELL_CHARGE, false);
                     break;
+                case EVENT_HEALING:        // Esto esta hecho para prevenir el bugeo del boss al sacarlo de su sala
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    me->CastSpell(me, SPELL_HEALING, true);
+                    break;
+                case EVENT_SPELL_SPRAY:
+                    me->AddAura(SPELL_SPRAY, me);
+                    break;
+                case EVENT_RAIN:
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                  {
+                    me->SetFacingToObject(target);
+                    me->CastSpell(target, SPELL_RAIN_OF_FIRE, true);
+                  }
+                  events.RepeatEvent(12000);
+                  break;
+                case EVENT_FRENZY:
+                  me->CastSpell(me, SPELL_FRENZY, true);
+                  break;
             }
 
             if (!events.IsInPhase(1))

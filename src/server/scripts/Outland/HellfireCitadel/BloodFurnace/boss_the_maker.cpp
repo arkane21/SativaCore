@@ -16,11 +16,20 @@ enum eEnums
     SPELL_EXPLODING_BREAKER     = 30925,
     SPELL_KNOCKDOWN             = 20276,
     SPELL_DOMINATION            = 25772,
+    SPELL_STICKY_OOZE_R         = 69774,
+    SPELL_STICKY_OOZE_M         = 69775,
+    SPELL_BILE                  = 58810,
+    SPELL_FURY                  = 40845,
 
     EVENT_SPELL_ACID                = 1,
     EVENT_SPELL_EXPLODING           = 2,
     EVENT_SPELL_DOMINATION          = 3,
     EVENT_SPELL_KNOCKDOWN           = 4,
+    EVENT_SPELL_OOZE_R              = 5,
+    EVENT_SPELL_OOZE_M              = 6,
+    EVENT_BILE                      = 7,
+    EVENT_FURY                      = 8,
+    EVENT_SPELL_DOMINATION_H        = 9,
 };
 
 class boss_the_maker : public CreatureScript
@@ -58,6 +67,11 @@ public:
             events.ScheduleEvent(EVENT_SPELL_EXPLODING, 6000);
             events.ScheduleEvent(EVENT_SPELL_DOMINATION, 120000);
             events.ScheduleEvent(EVENT_SPELL_KNOCKDOWN, 10000);
+            if (IsHeroic())
+              events.ScheduleEvent(EVENT_SPELL_OOZE_M, 6000);
+              events.ScheduleEvent(EVENT_SPELL_OOZE_R, 8000);
+              events.ScheduleEvent(EVENT_BILE, 1000);
+              events.ScheduleEvent(EVENT_FURY, 10000);
 
             if (!instance)
                 return;
@@ -106,13 +120,54 @@ public:
                     events.RepeatEvent(urand(7000, 11000));
                     break;
                 case EVENT_SPELL_DOMINATION:
+                  if (IsHeroic())
+                    {
+                      events.ScheduleEvent(EVENT_SPELL_DOMINATION_H, 120000);
+                    }
+                    else
+                    {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         me->CastSpell(target, SPELL_DOMINATION, false);
                     events.RepeatEvent(120000);
+                    }
                     break;
+                case EVENT_SPELL_DOMINATION_H:
+                    if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                      me->CastSpell(target, SPELL_DOMINATION, false);
+                    events.RepeatEvent(240000);
+                  break;
                 case EVENT_SPELL_KNOCKDOWN:
                     me->CastSpell(me->GetVictim(), SPELL_KNOCKDOWN, false);
                     events.RepeatEvent(urand(4000, 12000));
+                    break;
+                case EVENT_SPELL_OOZE_M:
+                    if (IsHeroic())
+                    me->CastSpell(me->GetVictim(), SPELL_STICKY_OOZE_M, true);
+                    events.RepeatEvent(9000);
+                    break;
+                case EVENT_SPELL_OOZE_R:
+                    if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                      {
+                        me->SetFacingToObject(target);
+                        me->CastSpell(target, SPELL_STICKY_OOZE_R, true);
+                      }
+                    events.RepeatEvent(10000);
+                    break;
+                  case EVENT_BILE:
+                    if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                      {
+                        me->SetFacingToObject(target);
+                        me->CastSpell(target, SPELL_BILE, true);
+                      }
+                    events.RepeatEvent(10000);
+                    break;
+                  case EVENT_FURY:
+                    if (IsHeroic())
+                    me->CastSpell(me, SPELL_FURY, true);
+                    events.RepeatEvent(24000);
                     break;
             }
 
@@ -130,4 +185,3 @@ void AddSC_boss_the_maker()
 {
     new boss_the_maker();
 }
-

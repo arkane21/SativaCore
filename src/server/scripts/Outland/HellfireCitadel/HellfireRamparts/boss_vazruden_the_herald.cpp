@@ -22,9 +22,15 @@ enum Spells
     SPELL_SUMMON_LIQUID_FIRE        = 31706,
     SPELL_REVENGE                   = 19130,
     SPELL_REVENGE_H                 = 40392,
+    SPELL_KNOCK                     = 10101,
+    SPELL_BLADESTORM                = 65947,
+    SPELL_SURGE                     = 42402,
+    SPELL_BONEGRINDER               = 43952,
     SPELL_CALL_NAZAN                = 30693,
     SPELL_BELLOWING_ROAR            = 39427,
-    SPELL_CONE_OF_FIRE              = 30926
+    SPELL_LIFE                      = 71783,
+    SPELL_WARRIOR_WILL              = 52309,
+    SPELL_CONE_OF_FIRE              = 36876
 };
 
 enum Misc
@@ -38,10 +44,17 @@ enum Misc
     EVENT_KILL_TALK                 = 2,
     EVENT_AGGRO_TALK                = 3,
     EVENT_SPELL_FIREBALL            = 4,
-    EVENT_SPELL_CONE_OF_FIRE        = 5,
-    EVENT_SPELL_BELLOWING_ROAR      = 6,
-    EVENT_CHANGE_POS                = 7,
-    EVENT_RESTORE_COMBAT            = 8
+    EVENT_SPELL_FIREBALL_H          = 5,
+    EVENT_SPELL_CONE_OF_FIRE        = 6,
+    EVENT_SPELL_BELLOWING_ROAR      = 7,
+    EVENT_CHANGE_POS                = 8,
+    EVENT_KNOCK                     = 9,
+    EVENT_BLADE                     = 10,
+
+    EVENT_SURGE                     = 11,
+    EVENT_RESTORE_COMBAT            = 12,
+    EVENT_BONEGRINDER               = 13,
+    EVENT_WARRIOR_WILL              = 14,
 };
 
 const Position NazanPos[3] =
@@ -159,6 +172,8 @@ public:
         {
             events.ScheduleEvent(EVENT_CHANGE_POS, 0);
             events.ScheduleEvent(EVENT_SPELL_FIREBALL, 5000);
+            if(IsHeroic())
+              events.ScheduleEvent(EVENT_SPELL_FIREBALL_H, 3000);
         }
 
         void AttackStart(Unit* who)
@@ -189,6 +204,7 @@ public:
                 events.ScheduleEvent(EVENT_SPELL_CONE_OF_FIRE, 5000);
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_SPELL_BELLOWING_ROAR, 10000);
+                    events.ScheduleEvent(EVENT_SPELL_FIREBALL_H, 5000);
             }
         }
 
@@ -204,14 +220,31 @@ public:
             switch (events.ExecuteEvent())
             {
                 case EVENT_SPELL_FIREBALL:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                      {
+                        me->SetFacingToObject(target);
                         me->CastSpell(target, SPELL_FIREBALL, false);
+                      }
                     events.ScheduleEvent(EVENT_SPELL_FIREBALL, urand(4000, 6000));
                     break;
+                case EVENT_SPELL_FIREBALL_H:
+                    if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 100.0f, true))
+                      {
+                        me->SetFacingToObject(target);
+                        me->CastSpell(target, SPELL_FIREBALL, true);
+                      }
+                      events.RepeatEvent(1000);
+                break;
                 case EVENT_CHANGE_POS:
                     me->GetMotionMaster()->MovePoint(POINT_FLIGHT, NazanPos[urand(0, 2)], false);
+                    me->CastSpell(me, SPELL_LIFE, true);  // para prevenir que maten al dragon en el aire
+                    me->CastSpell(me, SPELL_LIFE, true);
+                    me->CastSpell(me, SPELL_LIFE, true);
+                    me->CastSpell(me, SPELL_LIFE, true);
+                    me->CastSpell(me, SPELL_LIFE, true);
                     events.DelayEvents(7000);
-                    events.ScheduleEvent(EVENT_CHANGE_POS, 30000);
+                    events.ScheduleEvent(EVENT_CHANGE_POS, 20000);
                     break;
                 case EVENT_RESTORE_COMBAT:
                     me->GetMotionMaster()->MoveChase(me->GetVictim());
@@ -264,6 +297,9 @@ public:
         {
             events.ScheduleEvent(EVENT_AGGRO_TALK, 5000);
             events.ScheduleEvent(EVENT_SPELL_REVENGE, 4000);
+            if (IsHeroic())
+              events.ScheduleEvent(EVENT_KNOCK, 5000);
+              events.ScheduleEvent(EVENT_WARRIOR_WILL, 50);
         }
 
         void KilledUnit(Unit*)
@@ -296,6 +332,33 @@ public:
                     me->CastSpell(me->GetVictim(), DUNGEON_MODE(SPELL_REVENGE, SPELL_REVENGE_H), false);
                     events.ScheduleEvent(EVENT_SPELL_REVENGE, 6000);
                     break;
+                case EVENT_KNOCK:
+                  if (IsHeroic())
+                  me->CastSpell(me->GetVictim(), SPELL_KNOCK, false);
+                  DoResetThreat();
+                  events.ScheduleEvent(EVENT_SURGE, 500);
+                  break;
+                case EVENT_BLADE:
+                  if (IsHeroic())
+                  me->CastSpell(me, SPELL_BLADESTORM, true);
+                  events.ScheduleEvent(EVENT_BONEGRINDER, 0);
+                  events.ScheduleEvent(EVENT_KNOCK, 16000);
+                  break;
+                case EVENT_SURGE:
+                  if (IsHeroic())
+                  if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0))
+                    me->CastSpell(target, SPELL_SURGE, false);
+                    events.ScheduleEvent(EVENT_BLADE, 500);
+                  break;
+                case EVENT_BONEGRINDER:
+                  if (IsHeroic())
+                  me->AddAura(SPELL_BONEGRINDER, me);
+                  //me->CastSpell(me, SPELL_BONEGRINDER, true);
+                  break;
+                  case EVENT_WARRIOR_WILL:
+                  if (IsHeroic())
+                  me->CastSpell(me, SPELL_WARRIOR_WILL, true);
+                  events.RepeatEvent(60000);
             }
 
             DoMeleeAttackIfReady();

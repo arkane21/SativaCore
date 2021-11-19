@@ -17,17 +17,24 @@ enum eKelidan
 
     // Keldian spells
     SPELL_CORRUPTION            = 30938,
+    SPELL_CORRUPTION_H          = 65810,
     SPELL_EVOCATION             = 30935,
     SPELL_FIRE_NOVA             = 33132,
     SPELL_SHADOW_BOLT_VOLLEY    = 28599,
+    SPELL_SHADOW_BOLT_VOLLEY_H  = 59975,
     SPELL_BURNING_NOVA          = 30940,
     SPELL_VORTEX                = 37370,
+    SPELL_ARMOR                 = 47893,
+    SPELL_CURSE                 = 18223,
 
     // Channelers spells
     SPELL_SHADOW_BOLT               = 12739,
-    SPELL_SHADOW_BOLT_H             = 15472,
+    SPELL_SHADOW_BOLT_H             = 60015,
     SPELL_MARK_OF_SHADOW            = 30937,
     SPELL_CHANNELING                = 39123,
+    SPELL_FIREBAL_BARRAGE           = 37540,
+
+
 
     // Events
     EVENT_SPELL_VOLLEY              = 1,
@@ -36,6 +43,10 @@ enum eKelidan
     EVENT_SPELL_FIRE_NOVA           = 4,
     EVENT_SPELL_SHADOW_BOLT         = 5,
     EVENT_SPELL_MARK                = 6,
+    EVENT_AURAS                     = 7,
+    EVENT_CURSE                     = 8,
+    EVENT_BARRAGE                   = 9,
+    EVENT_SUMMON                    = 10,
 
     // Actions
     ACTION_CHANNELER_ENGAGED        = 1,
@@ -61,7 +72,7 @@ public:
 
     struct boss_kelidan_the_breakerAI : public ScriptedAI
     {
-        boss_kelidan_the_breakerAI(Creature* creature) : ScriptedAI(creature)
+        boss_kelidan_the_breakerAI(Creature* creature) : ScriptedAI(creature), summons(me)
         {
             instance = creature->GetInstanceScript();
             memset(&channelers, 0, sizeof(channelers));
@@ -69,6 +80,7 @@ public:
 
         InstanceScript* instance;
         EventMap events;
+        SummonList summons;
         uint64 channelers[5];
         uint32 checkTimer;
         bool addYell;
@@ -79,6 +91,7 @@ public:
             checkTimer = 5000;
 
             events.Reset();
+            summons.DespawnAll();
             ApplyImmunities(true);
             SummonChannelers();
             me->SetReactState(REACT_PASSIVE);
@@ -92,6 +105,10 @@ public:
             events.ScheduleEvent(EVENT_SPELL_VOLLEY, 1000);
             events.ScheduleEvent(EVENT_SPELL_CORRUPTION, 5000);
             events.ScheduleEvent(EVENT_SPELL_BURNING_NOVA, 15000);
+            if (IsHeroic())
+              events.ScheduleEvent(EVENT_AURAS, 100);
+              events.ScheduleEvent(EVENT_CURSE, 6000);
+              events.ScheduleEvent(EVENT_SUMMON, 10000);
 
             me->InterruptNonMeleeSpells(false);
             Talk(SAY_WAKE);
@@ -104,6 +121,20 @@ public:
         {
             if (urand(0, 1))
                 Talk(SAY_KILL);
+        }
+
+        void JustSummoned(Creature* cr) override
+        {
+            if (me->IsInCombat())
+                cr->SetInCombatWithZone();
+            if (cr->GetEntry() == NPC_CHANNELER)
+            {
+                cr->SetReactState(REACT_AGGRESSIVE);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    cr->AI()->AttackStart(target);
+            }
+
+            summons.Summon(cr);
         }
 
         void DoAction(int32 param)
@@ -187,6 +218,7 @@ public:
                 instance->SetData(DATA_KELIDAN, DONE);
                 instance->HandleGameObject(instance->GetData64(DATA_DOOR1), true);
                 instance->HandleGameObject(instance->GetData64(DATA_DOOR6), true);
+                summons.DespawnAll();
             }
         }
 
@@ -234,12 +266,32 @@ public:
             switch (events.ExecuteEvent())
             {
                 case EVENT_SPELL_VOLLEY:
+                  if (IsHeroic())
+                  {
+                    me->CastSpell(me, SPELL_SHADOW_BOLT_VOLLEY_H, false);
+                    events.RepeatEvent(urand(2000, 6000));
+                    break;
+                  }
+                  else
+                  {
                     me->CastSpell(me, SPELL_SHADOW_BOLT_VOLLEY, false);
                     events.RepeatEvent(urand(8000, 13000));
+                  }
                     break;
                 case EVENT_SPELL_CORRUPTION:
-                    me->CastSpell(me, SPELL_CORRUPTION, false);
+                  if (IsHeroic())
+                  {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    me->CastSpell(target, SPELL_CORRUPTION_H, true);
+                    events.RepeatEvent(urand(6000, 11000));
+                    break;
+                  }
+                  else
+                  {
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    me->CastSpell(target, SPELL_CORRUPTION, true);
                     events.RepeatEvent(urand(30000, 50000));
+                  }
                     break;
                 case EVENT_SPELL_BURNING_NOVA:
                     Talk(SAY_NOVA);
@@ -250,13 +302,27 @@ public:
 
                     if (IsHeroic())
                         DoTeleportAll(me->GetPositionX(), me->GetPositionY(), me->GetPositionZ(), me->GetOrientation());
-
                     events.DelayEvents(6000, 0);
                     events.RepeatEvent(urand(25000, 32000));
                     events.ScheduleEvent(EVENT_SPELL_FIRE_NOVA, 5000);
                     break;
                 case EVENT_SPELL_FIRE_NOVA:
                     me->CastSpell(me, SPELL_FIRE_NOVA, true);
+                    break;
+                case EVENT_AURAS:
+                  if (IsHeroic())
+                    me->CastSpell(me, SPELL_ARMOR, true);
+                    break;
+                case EVENT_CURSE:
+                  if (IsHeroic())
+                      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                      me->CastSpell(target, SPELL_CURSE, true);
+                      events.RepeatEvent(6000);
+                    break;
+                case EVENT_SUMMON:
+                    if (IsHeroic())
+                    me->SummonCreature(NPC_CHANNELER, me->GetPositionX() + urand(1, 20), me->GetPositionY() + urand(1, 20), me->GetPositionZ(), me->GetOrientation());
+                    events.RepeatEvent(20000);
                     break;
             }
 
@@ -285,6 +351,7 @@ public:
         void Reset()
         {
             events.Reset();
+            ApplyImmunities(true);
         }
 
         Creature* GetKelidan()
@@ -302,12 +369,36 @@ public:
             me->InterruptNonMeleeSpells(false);
             events.ScheduleEvent(EVENT_SPELL_SHADOW_BOLT, urand(1500, 3500));
             events.ScheduleEvent(EVENT_SPELL_MARK, urand(5000, 6500));
+            if (IsHeroic())
+              events.ScheduleEvent(EVENT_BARRAGE, 1000);
         }
 
         void JustDied(Unit*  /*killer*/)
         {
             if (Creature* kelidan = GetKelidan())
                 kelidan->AI()->DoAction(ACTION_CHANNELER_DIED);
+        }
+
+        void ApplyImmunities(bool apply)
+        {
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_CHARM, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DISORIENTED, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DISTRACT, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FEAR, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_ROOT, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SILENCE, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SLEEP, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SNARE, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_STUN, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_FREEZE, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_KNOCKOUT, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_POLYMORPH, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_BANISH, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SHACKLE, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_TURN, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_HORROR, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_DAZE, apply);
+            me->ApplySpellImmune(0, IMMUNITY_MECHANIC, MECHANIC_SAPPED, apply);
         }
 
         void UpdateAI(uint32 diff)
@@ -330,6 +421,12 @@ public:
                         me->CastSpell(target, SPELL_MARK_OF_SHADOW, false);
                     events.RepeatEvent(urand(16000, 17500));
                     break;
+                case EVENT_BARRAGE:
+                    if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                        me->CastSpell(target, SPELL_FIREBAL_BARRAGE, false);
+                    events.RepeatEvent(5000);
+                    break;
             }
 
             DoMeleeAttackIfReady();
@@ -347,4 +444,3 @@ void AddSC_boss_kelidan_the_breaker()
     new boss_kelidan_the_breaker();
     new npc_shadowmoon_channeler();
 }
-

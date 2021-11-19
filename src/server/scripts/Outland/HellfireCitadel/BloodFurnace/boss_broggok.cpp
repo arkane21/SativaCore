@@ -16,10 +16,20 @@ enum eEnums
     SPELL_POISON_CLOUD      = 30916,
     SPELL_POISON_BOLT       = 30917,
     SPELL_POISON            = 30914,
+    SPELL_INFUSION          = 44406,
+    SPELL_PLAGUE_BLAST      = 61095,
+    SPELL_SHADOW_STEP       = 36563,
+    SPELL_ACID              = 66880,
 
     EVENT_SPELL_SLIME       = 1,
     EVENT_SPELL_POISON      = 2,
-    EVENT_SPELL_BOLT        = 3
+    EVENT_SPELL_BOLT        = 3,
+    EVENT_SPELL_INFUSION    = 4,
+    EVENT_SPELL_BLAST       = 5,
+    EVENT_SPELL_STEP        = 6,
+    EVENT_CLEAN             = 7,
+    EVENT_ACID              = 8
+
 };
 
 class boss_broggok : public CreatureScript
@@ -82,15 +92,58 @@ public:
                     events.RepeatEvent(urand(7000, 12000));
                     break;
                 case EVENT_SPELL_BOLT:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        me->CastSpell(target, SPELL_POISON_BOLT, false);
-                    events.RepeatEvent(urand(6000, 11000));
+                    if (IsHeroic())
+                    {
+                      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                          me->CastSpell(target, SPELL_POISON_BOLT, false);
+                      events.RepeatEvent(urand(5000, 10000));
+                    }
+                    else
+                    {
+                      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                          me->CastSpell(target, SPELL_POISON_BOLT, false);
+                      events.RepeatEvent(urand(6000, 11000));
+                    }
                     break;
                 case EVENT_SPELL_POISON:
                     me->CastSpell(me, SPELL_POISON_CLOUD, false);
                     events.RepeatEvent(20000);
                     break;
-
+                case EVENT_SPELL_INFUSION:
+                    if (IsHeroic())
+                    me->AddAura(SPELL_INFUSION, me);
+                    events.RepeatEvent(2400);
+                    break;
+                case EVENT_SPELL_BLAST:
+                    if (IsHeroic())
+                    me->CastSpell(me, SPELL_PLAGUE_BLAST, false);
+                    events.ScheduleEvent(EVENT_CLEAN, 1100);
+                    break;
+                case EVENT_SPELL_STEP:
+                    if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                    {
+                      me->SetFacingToObject(target);
+                      me->CastSpell(target, SPELL_SHADOW_STEP, true);
+                    }
+                    events.ScheduleEvent(EVENT_SPELL_BLAST, 500);
+                    me->RemoveAura(36563); // 70% velocidad
+                    me->RemoveAura(36554); // 20% daño
+                    events.RepeatEvent(65000);
+                    break;
+                case EVENT_CLEAN:
+                    if (IsHeroic())
+                    me->RemoveAura(44406); // 25 cargas
+                    break;
+                case EVENT_ACID:
+                  if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                    {
+                      me->SetFacingToObject(target);
+                      me->CastSpell(target, SPELL_ACID, false);
+                    }
+                    events.RepeatEvent(8000);
+                    break;
             }
 
             DoMeleeAttackIfReady();
@@ -117,6 +170,10 @@ public:
                     events.ScheduleEvent(EVENT_SPELL_SLIME, 10000);
                     events.ScheduleEvent(EVENT_SPELL_POISON, 5000);
                     events.ScheduleEvent(EVENT_SPELL_BOLT, 7000);
+                    if (IsHeroic())
+                      events.ScheduleEvent(EVENT_SPELL_INFUSION, 2400);
+                      events.ScheduleEvent(EVENT_SPELL_STEP, 65500);
+                      events.ScheduleEvent(EVENT_ACID, 8000);
 
                     me->SetReactState(REACT_AGGRESSIVE);
                     me->RemoveFlag(UNIT_FIELD_FLAGS, UNIT_FLAG_IMMUNE_TO_PC | UNIT_FLAG_IMMUNE_TO_NPC | UNIT_FLAG_NON_ATTACKABLE);

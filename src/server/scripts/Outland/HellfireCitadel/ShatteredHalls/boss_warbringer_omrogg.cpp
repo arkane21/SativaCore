@@ -13,6 +13,9 @@ enum Spells
     SPELL_THUNDERCLAP           = 30633,
     SPELL_BURNING_MAUL_N        = 30598,
     SPELL_BURNING_MAUL_H        = 36056,
+    SPELL_UNBALANCING           = 67237,
+    SPELL_SUNDER                = 30901,
+    SPELL_FIRE_BLUE             = 40598,
 };
 
 enum Creatures
@@ -49,7 +52,12 @@ enum Events
     EVENT_SPELL_BURNING_MAUL    = 21,
     EVENT_SPELL_THUNDER_CLAP    = 22,
     EVENT_RESET_THREAT          = 23,
-    EVENT_SPELL_BLAST_WAVE      = 24
+    EVENT_SPELL_BLAST_WAVE      = 24,
+    EVENT_SPELL_UNBALANCING     = 25,
+    EVENT_SUNDER_ARMOR          = 26,
+    EVENT_SPELL_FIRE_BLUE       = 27,
+    EVENT_RESET_THREAT_A        = 28,
+
 };
 
 // ########################################################
@@ -93,10 +101,14 @@ public:
 
             _EnterCombat();
 
-            events.ScheduleEvent(EVENT_SPELL_FEAR, 8000);
+            events.ScheduleEvent(EVENT_SPELL_FEAR, 18000);
             events.ScheduleEvent(EVENT_SPELL_BURNING_MAUL, 25000);
             events.ScheduleEvent(EVENT_SPELL_THUNDER_CLAP, 15000);
             events.ScheduleEvent(EVENT_RESET_THREAT, 30000);
+            events.ScheduleEvent(EVENT_SPELL_UNBALANCING, 6000);
+            events.ScheduleEvent(EVENT_SUNDER_ARMOR, 12000);
+            events.ScheduleEvent(EVENT_SPELL_FIRE_BLUE, 8000);
+            events.ScheduleEvent(EVENT_RESET_THREAT_A, 25000);
         }
 
         void JustSummoned(Creature* summoned)
@@ -174,7 +186,7 @@ public:
             {
                 case EVENT_SPELL_FEAR:
                     me->CastSpell(me, SPELL_FEAR, false);
-                    events.ScheduleEvent(EVENT_SPELL_FEAR, 22000);
+                    events.ScheduleEvent(EVENT_SPELL_FEAR, 25000);
                     break;
                 case EVENT_SPELL_THUNDER_CLAP:
                     me->CastSpell(me, SPELL_THUNDERCLAP, false);
@@ -191,17 +203,36 @@ public:
                         DoResetThreat();
                         me->AddThreat(target, 10.0f);
                     }
+                    events.ScheduleEvent(EVENT_RESET_THREAT_A, 25000);
                     events.ScheduleEvent(EVENT_RESET_THREAT, 30000);
                     break;
                 case EVENT_SPELL_BURNING_MAUL:
                     Talk(EMOTE_ENRAGE);
                     me->CastSpell(me, DUNGEON_MODE(SPELL_BURNING_MAUL_N, SPELL_BURNING_MAUL_H), false);
-                    events.ScheduleEvent(EVENT_SPELL_BURNING_MAUL, 40000);
+                    events.ScheduleEvent(EVENT_SPELL_BURNING_MAUL, 25000);
+                    events.ScheduleEvent(EVENT_SPELL_BLAST_WAVE, 10000);
                     events.ScheduleEvent(EVENT_SPELL_BLAST_WAVE, 15000);
                     events.ScheduleEvent(EVENT_SPELL_BLAST_WAVE, 20000);
+                    events.ScheduleEvent(EVENT_SPELL_BLAST_WAVE, 25000);
                     break;
                 case EVENT_SPELL_BLAST_WAVE:
                     me->CastSpell(me, SPELL_BLAST_WAVE, false);
+                    break;
+                case EVENT_SPELL_UNBALANCING:
+                    me->CastSpell(me->GetVictim(), SPELL_UNBALANCING, false);
+                    events.RepeatEvent(6000);
+                    break;
+                case EVENT_SUNDER_ARMOR:
+                    me->CastSpell(me->GetVictim(), SPELL_SUNDER, true);
+                    events.RepeatEvent(12000);
+                    break;
+                case EVENT_SPELL_FIRE_BLUE:
+                  if (Unit* target = SelectTarget(SELECT_TARGET_FARTHEST, 0))
+                    me->CastSpell(target, SPELL_FIRE_BLUE, true);
+                    events.RepeatEvent(12000);
+                    break;
+                case EVENT_RESET_THREAT_A:
+                    me->MonsterTextEmote("Belisario Omrogg quiere cambiar de objetivo", 0, true);
                     break;
             }
 

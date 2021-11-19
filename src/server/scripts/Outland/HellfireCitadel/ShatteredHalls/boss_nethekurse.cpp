@@ -18,12 +18,16 @@ enum eGrandWarlockNethekurse
     SAY_DIE                     = 6,
 
     SPELL_DEATH_COIL_N          = 30741,
-    SPELL_DEATH_COIL_H          = 30500,
+    SPELL_DEATH_COIL_H          = 46283,
     SPELL_DARK_SPIN             = 30502,
     SPELL_SHADOW_FISSURE        = 30496,
     SPELL_SHADOW_CLEAVE_N       = 30495,
     SPELL_SHADOW_SLAM_H         = 35953,
     SPELL_SHADOW_SEAR           = 30735,
+    SPELL_BURNING_FURY          = 66721,
+    SPELL_SUMON_INFERNAL        = 34249,
+    SPELL_INFERNO_EFFECT        = 22703,
+    SPELL_ALLURING              = 29485,
 
     SETDATA_DATA                = 1,
     SETDATA_PEON_AGGRO          = 1,
@@ -39,9 +43,18 @@ enum eGrandWarlockNethekurse
     EVENT_SPELL_SHADOW_FISSURE  = 3,
     EVENT_SPELL_CLEAVE          = 4,
     EVENT_CHECK_HEALTH          = 5,
-    EVENT_START_ATTACK          = 6
+    EVENT_START_ATTACK          = 6,
+    EVENT_SHADOW_FISSURE_H      = 7,
+    EVENT_SUMON                 = 8,
+
 };
 
+enum Misc
+{
+
+  NPC_INFERNAL_DEFENDER        = 20160,
+
+};
 // ########################################################
 // Grand Warlock Nethekurse
 // ########################################################
@@ -124,6 +137,17 @@ public:
             summons.Summon(summon);
             summon->SetReactState(REACT_DEFENSIVE);
             summon->SetRegeneratingHealth(false);
+
+            if (me->IsInCombat())
+                summon->SetInCombatWithZone();
+            if (summon->GetEntry() == NPC_INFERNAL_DEFENDER)
+            {
+                summon->SetReactState(REACT_PASSIVE);
+                if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    summon->AI()->AttackStart(target);
+            }
+
+            summons.Summon(summon);
         }
 
         void MoveInLineOfSight(Unit* who)
@@ -185,9 +209,10 @@ public:
                     if (Unit* target = me->SelectNearestPlayer(50.0f))
                         AttackStart(target);
 
-                    events.ScheduleEvent(EVENT_SPELL_DEATH_COIL, 20000);
-                    events.ScheduleEvent(EVENT_SPELL_SHADOW_FISSURE, 8000);
+                    events.ScheduleEvent(EVENT_SPELL_DEATH_COIL, 12000);
+                    events.ScheduleEvent(EVENT_SPELL_SHADOW_FISSURE, 4000);
                     events.ScheduleEvent(EVENT_CHECK_HEALTH, 1000);
+                    events.ScheduleEvent(EVENT_SUMON, 15000);
                     return;
                 }
             }
@@ -202,23 +227,65 @@ public:
             switch (events.ExecuteEvent())
             {
                 case EVENT_SPELL_SHADOW_FISSURE:
+                  if (IsHeroic())
+                    {
+                      events.ScheduleEvent(EVENT_SHADOW_FISSURE_H, 1000);
+                    }
+                    else
+                    {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
                         me->CastSpell(target, SPELL_SHADOW_FISSURE, false);
                     events.RescheduleEvent(EVENT_SPELL_SHADOW_FISSURE, urand(7500, 10000));
+                    }
+                    break;
+                case EVENT_SHADOW_FISSURE_H:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                      me->CastSpell(target, SPELL_SHADOW_FISSURE, false);
+                    events.RescheduleEvent(EVENT_SPELL_SHADOW_FISSURE, 3000);
                     break;
                 case EVENT_SPELL_DEATH_COIL:
+                    if (IsHeroic())
+                    {
+                      if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                          me->CastSpell(target, SPELL_DEATH_COIL_H, false);
+                          me->CastSpell(me, SPELL_BURNING_FURY, true);
+                      events.RescheduleEvent(EVENT_SPELL_DEATH_COIL, 12000);
+                      break;
+                    }
+                    else
+                    {
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
-                        me->CastSpell(target, DUNGEON_MODE(SPELL_DEATH_COIL_N, SPELL_DEATH_COIL_H), false);
+                        me->CastSpell(target, SPELL_DEATH_COIL_N, false);
                     events.RescheduleEvent(EVENT_SPELL_DEATH_COIL, urand(15000, 20000));
+                    }
                     break;
                 case EVENT_SPELL_CLEAVE:
-                    me->CastSpell(me->GetVictim(), DUNGEON_MODE(SPELL_SHADOW_CLEAVE_N, SPELL_SHADOW_SLAM_H), false);
-                    events.RescheduleEvent(EVENT_SPELL_CLEAVE, urand(6000, 8000));
+                  if(IsHeroic())
+                  {
+                    me->CastSpell(me->GetVictim(), SPELL_SHADOW_SLAM_H, false);
+                    events.RepeatEvent(urand(6000, 8000));
+                  }
+                  else
+                  {
+                    me->CastSpell(me->GetVictim(), SPELL_SHADOW_CLEAVE_N, false);
+                    events.RepeatEvent(urand(6000, 8000));
+                  }
                     break;
                 case EVENT_CHECK_HEALTH:
                     if (me->HealthBelowPct(21))
                     {
-                        events.Reset();
+                        me->AddAura(SPELL_ALLURING, me);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+                        me->CastSpell(me, SPELL_BURNING_FURY, true);
+
                         me->CastSpell(me, SPELL_DARK_SPIN, false);
                     }
                     else
@@ -226,10 +293,18 @@ public:
                         events.RescheduleEvent(EVENT_CHECK_HEALTH, 1000);
                     }
                     break;
+                case EVENT_SUMON:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 150.0f, true))
+                    {
+                      me->SetFacingToObject(target);
+                      me->CastSpell(target, SPELL_SUMON_INFERNAL, true);
+                      me->CastSpell(target, SPELL_INFERNO_EFFECT, true);
+                      events.RepeatEvent(20000);
+                    }
+                    break;
             }
-
-            if (!me->HealthBelowPct(21))
-                DoMeleeAttackIfReady();
+          if (!me->HealthBelowPct(21))
+              DoMeleeAttackIfReady();
         }
 
     private:
@@ -255,7 +330,7 @@ public:
 
         void CalculateDamageAmount(AuraEffect const* /*aurEff*/, int32& amount, bool& /*canBeRecalculated*/)
         {
-            amount = 1000;
+            amount = 2500;
         }
 
         void Register()
@@ -269,6 +344,7 @@ public:
         return new spell_tsh_shadow_sear_AuraScript();
     }
 };
+
 
 class spell_tsh_shadow_bolt : public SpellScriptLoader
 {

@@ -19,10 +19,13 @@ enum Says
 enum Spells
 {
     SPELL_SHADOW_BOLT           = 30686,
+    SPELL_SHADOW_BOLT_H         = 71254,
     SPELL_SUMMON_FIENDISH_HOUND = 30707,
     SPELL_TREACHEROUS_AURA      = 30695,
     SPELL_DEMONIC_SHIELD        = 31901,
     SPELL_ORBITAL_STRIKE        = 30637,
+    SPELL_CURSE_AGONY           = 68138,
+    SPELL_STEAL                 = 30036,
     SPELL_SHADOW_WHIP           = 30638
 };
 
@@ -34,7 +37,9 @@ enum Misc
     EVENT_DEMONIC_SHIELD        = 4,
     EVENT_KILL_TALK             = 5,
     EVENT_ORBITAL_STRIKE        = 6,
-    EVENT_SHADOW_WHIP           = 7
+    EVENT_CURSE_AGONY           = 7,
+    EVENT_STEAL                 = 8,
+    EVENT_SHADOW_WHIP           = 9
 };
 
 class boss_omor_the_unscarred : public CreatureScript
@@ -63,8 +68,12 @@ public:
             events.ScheduleEvent(EVENT_SUMMON1, 10000);
             events.ScheduleEvent(EVENT_SUMMON2, 25000);
             events.ScheduleEvent(EVENT_TREACHEROUS_AURA, 6000);
-            events.ScheduleEvent(EVENT_DEMONIC_SHIELD, 1000);
+            events.ScheduleEvent(EVENT_DEMONIC_SHIELD, 10000);
             events.ScheduleEvent(EVENT_ORBITAL_STRIKE, 20000);
+            events.ScheduleEvent(EVENT_SHADOW_WHIP, 14000);
+            if (IsHeroic())
+              events.ScheduleEvent(EVENT_CURSE_AGONY, 12000);
+              events.ScheduleEvent(EVENT_STEAL, 5000);
         }
 
         void KilledUnit(Unit*)
@@ -109,37 +118,60 @@ public:
                     events.ScheduleEvent(EVENT_SUMMON2, 15000);
                     break;
                 case EVENT_TREACHEROUS_AURA:
-                    if (roll_chance_i(33))
+                    if (roll_chance_i(50))
                         Talk(SAY_CURSE);
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
+                      {
+                        me->SetFacingToObject(target);
                         me->CastSpell(target, SPELL_TREACHEROUS_AURA, false);
+                      }
                     events.ScheduleEvent(EVENT_TREACHEROUS_AURA, urand(12000, 18000));
                     break;
+                case EVENT_CURSE_AGONY:
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
+                      {
+                        me->SetFacingToObject(target);
+                        me->CastSpell(target, SPELL_CURSE_AGONY, true);
+                      }
+                    events.RepeatEvent(12000);
+                    break;
                 case EVENT_DEMONIC_SHIELD:
-                    if (me->HealthBelowPct(21))
-                    {
-                        me->CastSpell(me, SPELL_DEMONIC_SHIELD, false);
-                        events.ScheduleEvent(EVENT_DEMONIC_SHIELD, 15000);
-                    }
-                    else
-                        events.ScheduleEvent(EVENT_DEMONIC_SHIELD, 1000);
+                if (IsHeroic())
+                  {
+                      me->CastSpell(me, SPELL_DEMONIC_SHIELD, true);
+                      events.RepeatEvent(30000);
+                  }
+                  else
+                  {
+                      me->CastSpell(me, SPELL_DEMONIC_SHIELD, true);
+                      events.RepeatEvent(15000);
+                  }
                     break;
                 case EVENT_ORBITAL_STRIKE:
-                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 15.0f, true))
+                  if (roll_chance_i(100))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 10.0f, true))
                     {
-                        _targetGUID = target->GetGUID();
+                        me->SetFacingToObject(target);
                         me->CastSpell(target, SPELL_ORBITAL_STRIKE, false);
-                        events.DelayEvents(5000);
-                        events.ScheduleEvent(EVENT_SHADOW_WHIP, 4000);
-                        me->GetMotionMaster()->Clear();
                     }
-                    events.ScheduleEvent(EVENT_ORBITAL_STRIKE, 20000);
+                    events.RepeatEvent(20000);
                     break;
                 case EVENT_SHADOW_WHIP:
-                    me->GetMotionMaster()->MoveChase(me->GetVictim());
-                    if (Unit* target = ObjectAccessor::GetUnit(*me, _targetGUID))
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
+                    {
+                        me->SetFacingToObject(target);
                         me->CastSpell(target, SPELL_SHADOW_WHIP, false);
-                    _targetGUID = 0;
+                    }
+                    events.RepeatEvent(12000);
+                    break;
+                case EVENT_STEAL:
+                    if (IsHeroic())
+                    if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
+                    {
+                      me->SetFacingToObject(target);
+                      me->CastSpell(target, SPELL_STEAL, true);
+                    }
+                    events.RepeatEvent(10000);
                     break;
             }
 
@@ -153,9 +185,18 @@ public:
             }
             else
             {
-                me->GetMotionMaster()->Clear();
-                me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
-                me->resetAttackTimer();
+              if (IsHeroic())
+                {
+                  me->GetMotionMaster()->Clear();
+                  me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT_H, false);
+                  me->resetAttackTimer();
+                }
+                else
+                {
+                  me->GetMotionMaster()->Clear();
+                  me->CastSpell(me->GetVictim(), SPELL_SHADOW_BOLT, false);
+                  me->resetAttackTimer();
+                }
             }
         }
 
@@ -173,4 +214,3 @@ void AddSC_boss_omor_the_unscarred()
 {
     new boss_omor_the_unscarred();
 }
-
