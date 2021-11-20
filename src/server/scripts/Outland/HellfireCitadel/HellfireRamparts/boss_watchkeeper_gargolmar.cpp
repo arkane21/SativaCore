@@ -191,7 +191,7 @@ public:
                   case EVENT_FRENZY:
                       if (IsHeroic())
                         me->CastSpell(me, SPELL_UNHOLY_FRENZY, true);
-                        events.RepeatEvent(urand(8000, 13000));
+                        events.RepeatEvent(urand(8000, 15000));
                         break;
                   case EVENT_CHECK_HEALTH_B:
                         if (me->HealthBelowPct(45))

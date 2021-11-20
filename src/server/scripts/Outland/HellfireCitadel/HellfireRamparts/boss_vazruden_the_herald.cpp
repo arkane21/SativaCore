@@ -173,7 +173,7 @@ public:
             events.ScheduleEvent(EVENT_CHANGE_POS, 0);
             events.ScheduleEvent(EVENT_SPELL_FIREBALL, 5000);
             if(IsHeroic())
-              events.ScheduleEvent(EVENT_SPELL_FIREBALL_H, 3000);
+              events.ScheduleEvent(EVENT_SPELL_FIREBALL_H, 2000);
         }
 
         void AttackStart(Unit* who)
@@ -204,7 +204,7 @@ public:
                 events.ScheduleEvent(EVENT_SPELL_CONE_OF_FIRE, 5000);
                 if (IsHeroic())
                     events.ScheduleEvent(EVENT_SPELL_BELLOWING_ROAR, 10000);
-                    events.ScheduleEvent(EVENT_SPELL_FIREBALL_H, 5000);
+                    events.ScheduleEvent(EVENT_SPELL_FIREBALL_H, 6000);
             }
         }
 
@@ -234,7 +234,7 @@ public:
                         me->SetFacingToObject(target);
                         me->CastSpell(target, SPELL_FIREBALL, true);
                       }
-                      events.RepeatEvent(1000);
+                      events.RepeatEvent(2000);
                 break;
                 case EVENT_CHANGE_POS:
                     me->GetMotionMaster()->MovePoint(POINT_FLIGHT, NazanPos[urand(0, 2)], false);
@@ -342,6 +342,7 @@ public:
                   if (IsHeroic())
                   me->CastSpell(me, SPELL_BLADESTORM, true);
                   events.ScheduleEvent(EVENT_BONEGRINDER, 0);
+                  events.ScheduleEvent(EVENT_BONEGRINDER, 4000);
                   events.ScheduleEvent(EVENT_KNOCK, 16000);
                   break;
                 case EVENT_SURGE:

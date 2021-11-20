@@ -24,7 +24,7 @@ enum Spells
     SPELL_TREACHEROUS_AURA      = 30695,
     SPELL_DEMONIC_SHIELD        = 31901,
     SPELL_ORBITAL_STRIKE        = 30637,
-    SPELL_CURSE_AGONY           = 68138,
+    SPELL_CURSE_AGONY           = 65814,
     SPELL_STEAL                 = 30036,
     SPELL_SHADOW_WHIP           = 30638
 };
@@ -118,7 +118,7 @@ public:
                     events.ScheduleEvent(EVENT_SUMMON2, 15000);
                     break;
                 case EVENT_TREACHEROUS_AURA:
-                    if (roll_chance_i(50))
+                    if (roll_chance_i(33))
                         Talk(SAY_CURSE);
                     if (Unit* target = SelectTarget(SELECT_TARGET_RANDOM, 0, 80.0f, true))
                       {
@@ -139,7 +139,7 @@ public:
                 if (IsHeroic())
                   {
                       me->CastSpell(me, SPELL_DEMONIC_SHIELD, true);
-                      events.RepeatEvent(30000);
+                      events.RepeatEvent(40000);
                   }
                   else
                   {
